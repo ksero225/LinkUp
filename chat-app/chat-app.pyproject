@@ -1,0 +1,9 @@
+{
+    "files": [
+        "mainwindow.py",
+        "websocket_client.py",
+        "config.py",
+        "requirements.txt",
+        "form.ui"
+    ]
+}
