@@ -1,4 +1,4 @@
 FROM openjdk:21-oracle
-COPY target/*.jar LinkUp-0.0.1-SNAPSHOT.jar
+COPY target/*.jar test.jar
 EXPOSE 8089
-ENTRYPOINT ["java", "-jar","LinkUp-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar","test.jar"]
