@@ -27,14 +27,13 @@ public class UserController {
     private Mapper<UserRegisterRequest, UserRegisterRequestDto> userRegisterRequestMapper;
 
 
-    @GetMapping
+    @GetMapping(path = "/test")
     public String welcomeMessage(){
         return "Siemano, działa ";
     }
 
     @PostMapping(path = "/login")
     public ResponseEntity<UserDto> getUserByLogin(@RequestBody UserLoginRequestDto requestBody) {
-        System.out.println(requestBody);
         final UserLoginRequest userLoginRequest = userLoginRequestMapper.mapFrom(requestBody);
 
         return userService.loginUser(userLoginRequest)
