@@ -10,6 +10,7 @@ import com.LinkUp.LinkUp.mappers.Mapper;
 import com.LinkUp.LinkUp.mappers.impl.UserLoginRequestMapper;
 import com.LinkUp.LinkUp.services.UserService;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,8 @@ public class UserController {
     }
 
     @PostMapping(path = "/login")
-    public ResponseEntity<UserDto> getUserByLogin(@RequestBody final UserLoginRequestDto requestBody) {
+    public ResponseEntity<UserDto> getUserByLogin(@RequestBody UserLoginRequestDto requestBody) {
+        System.out.println(requestBody);
         final UserLoginRequest userLoginRequest = userLoginRequestMapper.mapFrom(requestBody);
 
         return userService.loginUser(userLoginRequest)
@@ -41,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody final UserRegisterRequestDto requestBody) {
+    public ResponseEntity<UserDto> registerUser(@RequestBody UserRegisterRequestDto requestBody) {
         final UserRegisterRequest userRegisterRequest = userRegisterRequestMapper.mapFrom(requestBody);
 
         User user = userService.registerUser(userRegisterRequest);
