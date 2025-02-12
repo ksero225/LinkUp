@@ -12,10 +12,7 @@ import com.LinkUp.LinkUp.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -27,6 +24,12 @@ public class UserController {
     private Mapper<User, UserDto> userMapper;
     private Mapper<UserLoginRequest, UserLoginRequestDto> userLoginRequestMapper;
     private Mapper<UserRegisterRequest, UserRegisterRequestDto> userRegisterRequestMapper;
+
+
+    @GetMapping
+    public String welcomeMessage(){
+        return "Siemano, działa ";
+    }
 
     @PostMapping(path = "/login")
     public ResponseEntity<UserDto> getUserByLogin(@RequestBody final UserLoginRequestDto requestBody) {
