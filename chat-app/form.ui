@@ -6,25 +6,94 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>598</width>
+    <height>417</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>LinkUp</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="4,2">
+      <item>
+       <widget class="QTextEdit" name="textEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="listWidget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Message:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="maxLength">
+         <number>255</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>598</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuKonto">
+    <property name="title">
+     <string>Account</string>
+    </property>
+    <addaction name="actionSign_in"/>
+    <addaction name="actionSign_up"/>
+    <addaction name="actionLog_out"/>
+    <addaction name="actionAbout_me"/>
+   </widget>
+   <addaction name="menuKonto"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSign_in">
+   <property name="text">
+    <string>Sign in</string>
+   </property>
+  </action>
+  <action name="actionSign_up">
+   <property name="text">
+    <string>Sign up</string>
+   </property>
+  </action>
+  <action name="actionLog_out">
+   <property name="text">
+    <string>Log out</string>
+   </property>
+  </action>
+  <action name="actionAbout_me">
+   <property name="text">
+    <string>About me</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

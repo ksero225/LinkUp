@@ -4,6 +4,8 @@
         "websocket_client.py",
         "config.py",
         "requirements.txt",
-        "form.ui"
+        "form.ui",
+        "LoginWindow.py",
+        "User.py"
     ]
 }
