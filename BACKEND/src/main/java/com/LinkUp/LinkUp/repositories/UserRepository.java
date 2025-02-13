@@ -16,11 +16,5 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     boolean existsByUserLoginOrUserEmail(String userLogin, String userEmail);
 
-    boolean existsByUserId(String userId);
-
-    @Query(value = "{ 'userId': ?0 }")
-    @Update("{ '$set': { 'isUserActive': { '$not': '$isUserActive' } } }")
-    @Transactional
-    void toggleUserStatus(@Param("userId") String userId);
-
+    //boolean existsByUserId(String userId);
 }

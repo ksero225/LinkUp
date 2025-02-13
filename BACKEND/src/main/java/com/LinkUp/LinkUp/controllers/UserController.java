@@ -58,7 +58,7 @@ public class UserController {
 
         User user = userService.registerUser(userRegisterRequest);
 
-        //user.setUserPassword("");
+        user.setUserPassword("");
         return new ResponseEntity<>(userMapper.mapTo(user), HttpStatus.OK);
     }
 

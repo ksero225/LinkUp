@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
         user.setUserPassword("");
 
-        userRepository.toggleUserStatus(user.getUserId());
+        toggleUserStatus(user.getUserId());
 
         return Optional.of(user);
     }
@@ -56,12 +56,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void toggleUserStatus(String userId) {
-        if(!userRepository.existsByUserId(userId)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found.");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
-        userRepository.toggleUserStatus(userId);
+        user.setIsUserActive(!user.getIsUserActive());
+
+        userRepository.save(user);
     }
 }
