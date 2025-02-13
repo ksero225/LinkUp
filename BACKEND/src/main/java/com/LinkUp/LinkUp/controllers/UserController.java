@@ -28,8 +28,19 @@ public class UserController {
 
 
     @GetMapping(path = "/test")
-    public String welcomeMessage(){
+    public String welcomeMessage() {
         return "Siemano, działa ";
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UserDto> getUserOneById(@RequestParam(value = "userId") final String userId) {
+        return userService.findOne(userId)
+                .map(user ->
+                        ResponseEntity.ok(userMapper.mapTo(user))
+                )
+                .orElseGet(() ->
+                        new ResponseEntity<>(HttpStatus.NOT_FOUND)
+                );
     }
 
     @PostMapping(path = "/login")
@@ -50,4 +61,11 @@ public class UserController {
         //user.setUserPassword("");
         return new ResponseEntity<>(userMapper.mapTo(user), HttpStatus.OK);
     }
+
+    @PatchMapping(path = "/toggleStatus")
+    public ResponseEntity<Void> toggleUserStatus(@RequestParam(value = "userId") final String userId) {
+        userService.toggleUserStatus(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

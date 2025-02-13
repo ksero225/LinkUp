@@ -8,6 +8,7 @@ import com.LinkUp.LinkUp.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -16,6 +17,11 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+
+    @Override
+    public Optional<User> findOne(String userId) {
+        return userRepository.findById(userId);
+    }
 
     @Override
     public Optional<User> loginUser(UserLoginRequest userLoginRequest) {
@@ -27,6 +33,8 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setUserPassword("");
+
+        userRepository.toggleUserStatus(user.getUserId());
 
         return Optional.of(user);
     }
@@ -45,5 +53,15 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return userRepository.save(newUser);
+    }
+
+    @Override
+    @Transactional
+    public void toggleUserStatus(String userId) {
+        if(!userRepository.existsByUserId(userId)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found.");
+        }
+
+        userRepository.toggleUserStatus(userId);
     }
 }
