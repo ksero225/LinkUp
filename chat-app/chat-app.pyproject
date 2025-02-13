@@ -6,6 +6,7 @@
         "requirements.txt",
         "form.ui",
         "LoginWindow.py",
-        "User.py"
+        "User.py",
+        "RegisterWindow.py"
     ]
 }

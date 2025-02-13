@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 
 from ui_form import Ui_MainWindow
 from LoginWindow import LoginWindow
+from RegisterWindow import RegisterWindow
 from User import User
 
 class MainWindow(QMainWindow):
@@ -19,6 +20,7 @@ class MainWindow(QMainWindow):
 
         # Połączenie akcji w menu z oknem logowania
         self.ui.actionSign_in.triggered.connect(self.show_login_window)
+        self.ui.actionSign_up.triggered.connect(self.show_register_window)
 
     def show_login_window(self):
         """Otwiera okno logowania i dodaje użytkownika do listy"""
@@ -30,6 +32,12 @@ class MainWindow(QMainWindow):
                 self.ui.actionSign_in.setEnabled(False)
                 self.ui.lineEdit.setText("")
                 self.ui.lineEdit.setReadOnly(False)
+
+    def show_register_window(self):
+        """Otwiera okno rejestracji"""
+        register_window = RegisterWindow(self)
+        if register_window.exec():  # Jeśli użytkownik się zarejestrował (dialog zwróci 1)
+            pass
 
 
 if __name__ == "__main__":

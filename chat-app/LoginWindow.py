@@ -1,6 +1,10 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import bcrypt
 import json
+import requests
+import threading
+from User import User
+from config import api_link_login
 
 class LoginWindow(QDialog):
     def __init__(self, parent=None):
@@ -8,7 +12,7 @@ class LoginWindow(QDialog):
         self.setWindowTitle("Logowanie")
         self.setFixedSize(300, 150)
 
-        self.username = None
+        self.user = None
 
         layout = QVBoxLayout(self)
 
@@ -34,11 +38,22 @@ class LoginWindow(QDialog):
         username = self.input_user.text()
         password = self.input_password.text()
 
-        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        # Jeśli username i password są poprawne, uruchamiamy zapytanie HTTP w osobnym wątku
+        if username and password:
+            hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-        data = json.dumps({"username": username, "password": hashed_password})
+            threading.Thread(target=self.login_request, args=(username, hashed_password)).start()
+
+    def login_request(self, username, password):
+        data = json.dumps({"userLogin": username, "userPassword": password})
         print(data)
 
-        if username and password:  # Prosta walidacja
-            self.username = username  # Zapisujemy nazwę użytkownika
-            self.accept()  # Zamykamy okno logowania
+        try:
+            response = requests.post(api_link_login, json=data)
+            print(response.status_code)
+
+            if response.status_code == 200:
+                # Obsługuje logikę, np. zamyka okno logowania, jeśli dane są poprawne
+                self.accept()
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
