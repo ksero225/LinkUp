@@ -45,7 +45,7 @@ class LoginWindow(QDialog):
             threading.Thread(target=self.login_request, args=(username, hashed_password)).start()
 
     def login_request(self, username, password):
-        data = json.dumps({"userLogin": username, "userPassword": password})
+        data = {"userLogin": username, "userPassword": password}
         print(data)
 
         try:

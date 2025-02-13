@@ -68,7 +68,7 @@ class RegisterWindow(QDialog):
         threading.Thread(target=self.register_request, args=(username, email, hashed_password)).start()
 
     def register_request(self, username, email, hashed_password):
-        data = json.dumps({"userLogin": username, "userEmail": email, "userPassword": hashed_password})
+        data = {"userLogin": username, "userEmail": email, "userPassword": hashed_password}
         print(data)
 
         try:
