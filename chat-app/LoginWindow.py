@@ -1,8 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import bcrypt
-import json
 import requests
-import threading
 from User import User
 from config import api_link_login
 
@@ -42,18 +40,25 @@ class LoginWindow(QDialog):
         if username and password:
             hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-            threading.Thread(target=self.login_request, args=(username, hashed_password)).start()
+            data = {"userLogin": username, "userPassword": hashed_password}
+            print(data)
 
-    def login_request(self, username, password):
-        data = {"userLogin": username, "userPassword": password}
-        print(data)
+            try:
+                response = requests.post(api_link_login, json=data)
+                print(response.status_code)
 
-        try:
-            response = requests.post(api_link_login, json=data)
-            print(response.status_code)
+                if response.status_code == 200:
+                    response_data = response.json()
+                    self.user = User(response_data["userId"], response_data["userLogin"], response_data["userEmail"])
 
-            if response.status_code == 200:
-                # Obsługuje logikę, np. zamyka okno logowania, jeśli dane są poprawne
-                self.accept()
-        except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
+                    print(self.user.get_user_email())
+                    self.accept()
+                elif response.status_code == 401:
+                    show_error_message(f"Incorrect login or password")
+                else:
+                    show_error_message(f"Server connection error")
+            except requests.exceptions.RequestException as e:
+                show_error_message(f"Error: {e}")
+
+
+

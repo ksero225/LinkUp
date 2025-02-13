@@ -1,9 +1,8 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import bcrypt
-import json
 import requests
-import threading
 from config import api_link_register
+from ErrorHandler import show_error_message
 
 class RegisterWindow(QDialog):
     def __init__(self, parent=None):
@@ -56,18 +55,19 @@ class RegisterWindow(QDialog):
         confirm_password = self.input_confirm_password.text()
 
         if not username or not email or not password or not confirm_password:
-            print("All fields are required!")
+            show_error_message("All fields are required!")
+            return
+
+        if len(password) < 8:
+            show_error_message("The password must be at least 8 characters long!")
             return
 
         if password != confirm_password:
-            print("Passwords are not identical!")
+            show_error_message("Passwords are not identical!")
             return
 
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-        threading.Thread(target=self.register_request, args=(username, email, hashed_password)).start()
-
-    def register_request(self, username, email, hashed_password):
         data = {"userLogin": username, "userEmail": email, "userPassword": hashed_password}
         print(data)
 
@@ -76,9 +76,9 @@ class RegisterWindow(QDialog):
             print(response.status_code)
 
             if response.status_code == 200:
-                print("Registration completed successfully!")
                 self.accept()
             else:
-                print("Registration error!")
+                show_error_message("Registration error!")
         except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
+            show_error_message(f"Error: {e}")
+
