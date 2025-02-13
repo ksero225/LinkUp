@@ -65,9 +65,6 @@ class RegisterWindow(QDialog):
 
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-        threading.Thread(target=self.register_request, args=(username, email, hashed_password)).start()
-
-    def register_request(self, username, email, hashed_password):
         data = {"userLogin": username, "userEmail": email, "userPassword": hashed_password}
         print(data)
 
@@ -82,3 +79,4 @@ class RegisterWindow(QDialog):
                 print("Registration error!")
         except requests.exceptions.RequestException as e:
             print(f"Error: {e}")
+

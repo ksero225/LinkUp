@@ -42,18 +42,17 @@ class LoginWindow(QDialog):
         if username and password:
             hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-            threading.Thread(target=self.login_request, args=(username, hashed_password)).start()
+            data = {"userLogin": username, "userPassword": hashed_password}
+            print(data)
 
-    def login_request(self, username, password):
-        data = {"userLogin": username, "userPassword": password}
-        print(data)
+            try:
+                response = requests.post(api_link_login, json=data)
+                print(response.status_code)
 
-        try:
-            response = requests.post(api_link_login, json=data)
-            print(response.status_code)
+                if response.status_code == 200:
+                    self.accept()
+            except requests.exceptions.RequestException as e:
+                print(f"Error: {e}")
 
-            if response.status_code == 200:
-                # Obsługuje logikę, np. zamyka okno logowania, jeśli dane są poprawne
-                self.accept()
-        except requests.exceptions.RequestException as e:
-            print(f"Error: {e}")
+
+
