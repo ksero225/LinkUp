@@ -1,8 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import bcrypt
-import json
 import requests
-import threading
 from User import User
 from config import api_link_login
 
@@ -50,9 +48,17 @@ class LoginWindow(QDialog):
                 print(response.status_code)
 
                 if response.status_code == 200:
+                    response_data = response.json()
+                    self.user = User(response_data["userId"], response_data["userLogin"], response_data["userEmail"])
+
+                    print(self.user.get_user_email())
                     self.accept()
+                elif response.status_code == 401:
+                    show_error_message(f"Incorrect login or password")
+                else:
+                    show_error_message(f"Server connection error")
             except requests.exceptions.RequestException as e:
-                print(f"Error: {e}")
+                show_error_message(f"Error: {e}")
 
 
 
