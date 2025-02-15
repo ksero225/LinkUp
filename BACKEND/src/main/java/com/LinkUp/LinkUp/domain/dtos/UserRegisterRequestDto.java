@@ -13,4 +13,5 @@ public class UserRegisterRequestDto {
     private String userLogin;
     private String userPassword;
     private String userEmail;
+    private boolean isUserActive;
 }

@@ -13,6 +13,7 @@ public class UserRegisterRequestMapper implements Mapper<UserRegisterRequest, Us
                 .userLogin(userRegisterRequest.getUserLogin())
                 .userPassword(userRegisterRequest.getUserPassword())
                 .userEmail(userRegisterRequest.getUserEmail())
+                .isUserActive(userRegisterRequest.isUserActive())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class UserRegisterRequestMapper implements Mapper<UserRegisterRequest, Us
                 .userLogin(userRegisterRequestDto.getUserLogin())
                 .userPassword(userRegisterRequestDto.getUserPassword())
                 .userEmail(userRegisterRequestDto.getUserEmail())
+                .isUserActive(userRegisterRequestDto.isUserActive())
                 .build();
     }
 }
