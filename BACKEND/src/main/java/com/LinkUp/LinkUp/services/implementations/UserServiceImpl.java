@@ -50,6 +50,7 @@ public class UserServiceImpl implements UserService {
                 .userLogin(userRegisterRequest.getUserLogin())
                 .userPassword(userRegisterRequest.getUserPassword())
                 .userEmail(userRegisterRequest.getUserEmail())
+                .isUserActive(userRegisterRequest.isUserActive())
                 .build();
 
         return userRepository.save(newUser);
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
-        user.setIsUserActive(!user.getIsUserActive());
+        user.setUserActive(!user.isUserActive());
 
         userRepository.save(user);
     }
