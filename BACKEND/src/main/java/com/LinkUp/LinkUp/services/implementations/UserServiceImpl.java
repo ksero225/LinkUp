@@ -42,8 +42,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public User registerUser(UserRegisterRequest userRegisterRequest) {
 
-        if (userRepository.existsByUserLoginOrUserEmail(userRegisterRequest.getUserLogin(), userRegisterRequest.getUserEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login or email is already taken.");
+//        if (userRepository.existsByUserLoginOrUserEmail(userRegisterRequest.getUserLogin(), userRegisterRequest.getUserEmail())) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login or email is already taken.");
+//        }
+
+        if(userRepository.existsUserByUserLogin(userRegisterRequest.getUserLogin())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login is already taken.");
+        }
+
+        if(userRepository.existsUserByUserEmail(userRegisterRequest.getUserEmail())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "email is already taken.");
+
         }
 
         User newUser = User.builder()
