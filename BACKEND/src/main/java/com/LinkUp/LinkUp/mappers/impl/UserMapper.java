@@ -14,7 +14,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .userLogin(user.getUserPassword())
                 .userPassword(user.getUserPassword())
                 .userEmail(user.getUserEmail())
-                .isUserActive(user.getIsUserActive())
+                .isUserActive(user.isUserActive())
                 .build();
     }
 
@@ -25,7 +25,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .userLogin(userDto.getUserPassword())
                 .userPassword(userDto.getUserPassword())
                 .userEmail(userDto.getUserEmail())
-                .isUserActive(userDto.getIsUserActive())
+                .isUserActive(userDto.isUserActive())
                 .build();
     }
 }
