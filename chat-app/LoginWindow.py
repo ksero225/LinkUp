@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
-import bcrypt
 import requests
 from User import User
 from config import api_link_login
+from ErrorHandler import show_error_message
 
 class LoginWindow(QDialog):
     def __init__(self, parent=None):
@@ -38,9 +38,7 @@ class LoginWindow(QDialog):
 
         # Jeśli username i password są poprawne, uruchamiamy zapytanie HTTP w osobnym wątku
         if username and password:
-            hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-            data = {"userLogin": username, "userPassword": hashed_password}
+            data = {"userLogin": username, "userPassword": password}
             print(data)
 
             try:

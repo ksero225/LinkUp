@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
-import bcrypt
 import requests
 from config import api_link_register
 from ErrorHandler import show_error_message
@@ -66,9 +65,7 @@ class RegisterWindow(QDialog):
             show_error_message("Passwords are not identical!")
             return
 
-        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-        data = {"userLogin": username, "userEmail": email, "userPassword": hashed_password}
+        data = {"userLogin": username, "userEmail": email, "userPassword": password}
         print(data)
 
         try:
