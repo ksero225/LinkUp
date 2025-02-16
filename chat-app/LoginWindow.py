@@ -49,7 +49,9 @@ class LoginWindow(QDialog):
                     response_data = response.json()
                     self.user = User(response_data["userId"], response_data["userLogin"], response_data["userEmail"])
 
+                    print(self.user.get_user_login())
                     print(self.user.get_user_email())
+                    print(self.user.get_user_id())
                     self.accept()
                 elif response.status_code == 401:
                     show_error_message(f"Incorrect login or password")

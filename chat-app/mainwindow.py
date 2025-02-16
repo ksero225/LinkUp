@@ -15,6 +15,8 @@ class MainWindow(QMainWindow):
 
         self.user = None
 
+        self.set_status_label()
+
         self.ui.lineEdit.setText("Log in before start typing")
         self.ui.lineEdit.setReadOnly(True)
 
@@ -27,17 +29,25 @@ class MainWindow(QMainWindow):
         login_window = LoginWindow(self)
         if login_window.exec():  # Jeśli użytkownik się zalogował (dialog zwróci 1)
             self.user = login_window.user
+            print(self.user)
             if self.user:
                 self.ui.listWidget.addItem(self.user.get_user_login())  # Dodaj do listy
                 self.ui.actionSign_in.setEnabled(False)
                 self.ui.lineEdit.setText("")
                 self.ui.lineEdit.setReadOnly(False)
+                self.set_status_label()
 
     def show_register_window(self):
         """Otwiera okno rejestracji"""
         register_window = RegisterWindow(self)
         if register_window.exec():  # Jeśli użytkownik się zarejestrował (dialog zwróci 1)
             pass
+
+    def set_status_label(self):
+        if self.user:
+            self.ui.label_2.setText(f'Status: <span style="color: green;">online({self.user.get_user_login()})</span>')
+        else:
+            self.ui.label_2.setText('Status: <span style="color: red;">offline</span>')
 
 
 if __name__ == "__main__":
