@@ -26,9 +26,9 @@ class MainWindow(QMainWindow):
         """Otwiera okno logowania i dodaje użytkownika do listy"""
         login_window = LoginWindow(self)
         if login_window.exec():  # Jeśli użytkownik się zalogował (dialog zwróci 1)
-            username = login_window.username  # Pobierz login
-            if username:
-                self.ui.listWidget.addItem(username)  # Dodaj do listy
+            self.user = login_window.user
+            if self.user:
+                self.ui.listWidget.addItem(self.user.get_user_login())  # Dodaj do listy
                 self.ui.actionSign_in.setEnabled(False)
                 self.ui.lineEdit.setText("")
                 self.ui.lineEdit.setReadOnly(False)

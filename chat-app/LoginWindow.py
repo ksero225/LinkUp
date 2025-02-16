@@ -7,7 +7,7 @@ from ErrorHandler import show_error_message
 class LoginWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Logowanie")
+        self.setWindowTitle("Login window")
         self.setFixedSize(300, 150)
 
         self.user = None

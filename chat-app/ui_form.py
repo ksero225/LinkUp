@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(598, 417)
+        MainWindow.resize(611, 423)
         self.actionSign_in = QAction(MainWindow)
         self.actionSign_in.setObjectName(u"actionSign_in")
         self.actionSign_up = QAction(MainWindow)
@@ -38,6 +38,13 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.label_2 = QLabel(self.centralwidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.verticalLayout.addWidget(self.label_2)
+
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.textEdit = QTextEdit(self.centralwidget)
@@ -76,7 +83,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 598, 21))
+        self.menubar.setGeometry(QRect(0, 0, 611, 21))
         self.menuKonto = QMenu(self.menubar)
         self.menuKonto.setObjectName(u"menuKonto")
         MainWindow.setMenuBar(self.menubar)
@@ -101,6 +108,7 @@ class Ui_MainWindow(object):
         self.actionSign_up.setText(QCoreApplication.translate("MainWindow", u"Sign up", None))
         self.actionLog_out.setText(QCoreApplication.translate("MainWindow", u"Log out", None))
         self.actionAbout_me.setText(QCoreApplication.translate("MainWindow", u"About me", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Status: Offline", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Message:", None))
         self.menuKonto.setTitle(QCoreApplication.translate("MainWindow", u"Account", None))
     # retranslateUi
