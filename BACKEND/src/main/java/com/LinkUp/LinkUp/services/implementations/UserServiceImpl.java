@@ -6,7 +6,10 @@ import com.LinkUp.LinkUp.domain.documents.User;
 import com.LinkUp.LinkUp.repositories.UserRepository;
 import com.LinkUp.LinkUp.services.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,6 +21,9 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    private final PasswordEncoder encoder;
+
+
     @Override
     public Optional<User> findOne(String userId) {
         return userRepository.findById(userId);
@@ -25,39 +31,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> loginUser(UserLoginRequest userLoginRequest) {
-        User user = userRepository.findUserByUserLogin(userLoginRequest.getUserLogin())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid login. User not found"));
+        User foundUser = userRepository.findUserByUserLogin(userLoginRequest.getUserLogin())
+                .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Invalid login. User not found"
+                        )
+                );
 
-        if (!user.getUserPassword().equals(userLoginRequest.getUserPassword())) {
+        if (!encoder.matches(userLoginRequest.getUserPassword(), foundUser.getUserPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password.");
         }
 
-        user.setUserPassword("");
+        foundUser.setUserPassword("");
 
-        toggleUserStatus(user.getUserId());
+        toggleUserStatus(foundUser.getUserId());
 
-        return Optional.of(user);
+        return Optional.of(foundUser);
     }
 
     @Override
     public User registerUser(UserRegisterRequest userRegisterRequest) {
-
-//        if (userRepository.existsByUserLoginOrUserEmail(userRegisterRequest.getUserLogin(), userRegisterRequest.getUserEmail())) {
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login or email is already taken.");
-//        }
-
-        if(userRepository.existsUserByUserLogin(userRegisterRequest.getUserLogin())){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login is already taken.");
+        if (userRepository.existsUserByUserLogin(userRegisterRequest.getUserLogin())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Login is already taken."
+            );
         }
 
-        if(userRepository.existsUserByUserEmail(userRegisterRequest.getUserEmail())){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "email is already taken.");
+        if (userRepository.existsUserByUserEmail(userRegisterRequest.getUserEmail())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "email is already taken."
+            );
 
         }
 
         User newUser = User.builder()
                 .userLogin(userRegisterRequest.getUserLogin())
-                .userPassword(userRegisterRequest.getUserPassword())
+                .userPassword(encoder.encode(userRegisterRequest.getUserPassword()))
                 .userEmail(userRegisterRequest.getUserEmail())
                 .isUserActive(userRegisterRequest.isUserActive())
                 .build();
