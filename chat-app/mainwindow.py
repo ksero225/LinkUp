@@ -15,6 +15,9 @@ class MainWindow(QMainWindow):
 
         self.user = None
 
+        self.ui.actionAdd_new_contact.setEnabled(False)
+        self.ui.actionDelete_contact.setEnabled(False)
+
         self.set_status_label()
 
         self.ui.lineEdit.setText("Log in before start typing")
@@ -29,13 +32,14 @@ class MainWindow(QMainWindow):
         login_window = LoginWindow(self)
         if login_window.exec():  # Jeśli użytkownik się zalogował (dialog zwróci 1)
             self.user = login_window.user
-            print(self.user)
             if self.user:
-                self.ui.listWidget.addItem(self.user.get_user_login())  # Dodaj do listy
+                self.add_contacts_to_widget()  # Dodaj do listy
                 self.ui.actionSign_in.setEnabled(False)
                 self.ui.lineEdit.setText("")
                 self.ui.lineEdit.setReadOnly(False)
                 self.set_status_label()
+                self.ui.actionAdd_new_contact.setEnabled(True)
+                self.ui.actionDelete_contact.setEnabled(True)
 
     def show_register_window(self):
         """Otwiera okno rejestracji"""
@@ -49,6 +53,9 @@ class MainWindow(QMainWindow):
         else:
             self.ui.label_2.setText('Status: <span style="color: red;">offline</span>')
 
+    def add_contacts_to_widget(self):
+        for contact in self.user.get_user_contacts():
+            self.ui.listWidget.addItem(contact)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

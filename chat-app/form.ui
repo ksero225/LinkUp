@@ -84,7 +84,15 @@
     <addaction name="actionLog_out"/>
     <addaction name="actionAbout_me"/>
    </widget>
+   <widget class="QMenu" name="menuManage_contacts">
+    <property name="title">
+     <string>Manage contacts</string>
+    </property>
+    <addaction name="actionAdd_new_contact"/>
+    <addaction name="actionDelete_contact"/>
+   </widget>
    <addaction name="menuKonto"/>
+   <addaction name="menuManage_contacts"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSign_in">
@@ -105,6 +113,16 @@
   <action name="actionAbout_me">
    <property name="text">
     <string>About me</string>
+   </property>
+  </action>
+  <action name="actionAdd_new_contact">
+   <property name="text">
+    <string>Add contact</string>
+   </property>
+  </action>
+  <action name="actionDelete_contact">
+   <property name="text">
+    <string>Delete contact</string>
    </property>
   </action>
  </widget>

@@ -1,10 +1,10 @@
 class User:
-    def __init__(self, userId: int, userLogin: str, userEmail: str):
+    def __init__(self, userId: int, userLogin: str, userEmail: str, userFriendList: list):
         self._userId = userId
         self._userLogin = userLogin
         self._userEmail = userEmail
         self._isUserActive = True
-        self._userContacts = []
+        self._userContacts = userFriendList
 
     def get_user_id(self):
         return self._userId
@@ -18,6 +18,9 @@ class User:
     def get_is_user_active(self):
         return self._isUserActive
 
+    def get_user_contacts(self):
+        return self._userContacts
+
     def set_user_id(self, user_id):
         self._userId = user_id
 
@@ -29,3 +32,6 @@ class User:
 
     def set_is_user_active(self, is_user_active):
         self._isUserActive = is_user_active
+
+    def set_user_contacts(self, user_contacts):
+        self._userContacts = user_contacts

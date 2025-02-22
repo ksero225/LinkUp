@@ -52,7 +52,6 @@ class RegisterWindow(QDialog):
         email = self.input_email.text()
         password = self.input_password.text()
         confirm_password = self.input_confirm_password.text()
-        is_user_active = False
 
         if not username or not email or not password or not confirm_password:
             show_error_message("All fields are required!")
@@ -66,7 +65,7 @@ class RegisterWindow(QDialog):
             show_error_message("Passwords are not identical!")
             return
 
-        data = {"userLogin": username, "userEmail": email, "userPassword": password, "isUserActive": is_user_active}
+        data = {"userLogin": username, "userEmail": email, "userPassword": password}
         print(data)
 
         try:
