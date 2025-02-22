@@ -4,6 +4,7 @@ class User:
         self._userLogin = userLogin
         self._userEmail = userEmail
         self._isUserActive = True
+        self._userContacts = []
 
     def get_user_id(self):
         return self._userId
