@@ -44,6 +44,7 @@ class LoginWindow(QDialog):
             try:
                 response = requests.post(api_link_login, json=data)
                 print(response.status_code)
+                print(response)
 
                 if response.status_code == 200:
                     response_data = response.json()

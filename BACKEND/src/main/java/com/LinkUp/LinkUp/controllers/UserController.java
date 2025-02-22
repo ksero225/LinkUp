@@ -3,6 +3,7 @@ package com.LinkUp.LinkUp.controllers;
 import com.LinkUp.LinkUp.domain.UserLoginRequest;
 import com.LinkUp.LinkUp.domain.UserRegisterRequest;
 import com.LinkUp.LinkUp.domain.documents.User;
+import com.LinkUp.LinkUp.domain.dtos.ContactDto;
 import com.LinkUp.LinkUp.domain.dtos.UserDto;
 import com.LinkUp.LinkUp.domain.dtos.UserLoginRequestDto;
 import com.LinkUp.LinkUp.domain.dtos.UserRegisterRequestDto;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController

@@ -1,9 +1,12 @@
 package com.LinkUp.LinkUp.mappers.impl;
 
 import com.LinkUp.LinkUp.domain.documents.User;
+import com.LinkUp.LinkUp.domain.dtos.ContactDto;
 import com.LinkUp.LinkUp.domain.dtos.UserDto;
 import com.LinkUp.LinkUp.mappers.Mapper;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 @Component
 public class UserMapper implements Mapper<User, UserDto> {
@@ -11,10 +14,11 @@ public class UserMapper implements Mapper<User, UserDto> {
     public UserDto mapTo(User user) {
         return UserDto.builder()
                 .userId(user.getUserId())
-                .userLogin(user.getUserPassword())
+                .userLogin(user.getUserLogin())
                 .userPassword(user.getUserPassword())
                 .userEmail(user.getUserEmail())
                 .isUserActive(user.isUserActive())
+                .userFriendList(user.getUserFriendList())
                 .build();
     }
 
@@ -22,7 +26,7 @@ public class UserMapper implements Mapper<User, UserDto> {
     public User mapFrom(UserDto userDto) {
         return User.builder()
                 .userId(userDto.getUserId())
-                .userLogin(userDto.getUserPassword())
+                .userLogin(userDto.getUserLogin())
                 .userPassword(userDto.getUserPassword())
                 .userEmail(userDto.getUserEmail())
                 .isUserActive(userDto.isUserActive())

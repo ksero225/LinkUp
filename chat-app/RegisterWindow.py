@@ -72,7 +72,7 @@ class RegisterWindow(QDialog):
         try:
             response = requests.post(api_link_register, json=data)
             print(response.status_code)
-
+            print(response)
             if response.status_code == 200:
                 self.accept()
             else:
