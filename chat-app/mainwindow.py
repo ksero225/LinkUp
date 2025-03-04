@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from ui_form import Ui_MainWindow
 from LoginWindow import LoginWindow
 from RegisterWindow import RegisterWindow
+from AddContactWindow import AddContactWindow
+from RemoveContactWindow import RemoveContactWindow
 from User import User
 
 class MainWindow(QMainWindow):
@@ -26,6 +28,8 @@ class MainWindow(QMainWindow):
         # Połączenie akcji w menu z oknem logowania
         self.ui.actionSign_in.triggered.connect(self.show_login_window)
         self.ui.actionSign_up.triggered.connect(self.show_register_window)
+        self.ui.actionAdd_new_contact.triggered.connect(self.show_add_contact_window)
+        self.ui.actionDelete_contact.triggered.connect(self.show_remove_contact_window)
 
     def show_login_window(self):
         """Otwiera okno logowania i dodaje użytkownika do listy"""
@@ -45,6 +49,18 @@ class MainWindow(QMainWindow):
         """Otwiera okno rejestracji"""
         register_window = RegisterWindow(self)
         if register_window.exec():  # Jeśli użytkownik się zarejestrował (dialog zwróci 1)
+            pass
+
+    def show_add_contact_window(self):
+        """Otwiera okno dodawania kontaktu"""
+        new_contact_window = AddContactWindow(self, user_id=self.user.get_user_id())
+        if new_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
+            pass
+
+    def show_remove_contact_window(self):
+        """Otwiera okno usuwania kontaktu"""
+        remove_contact_window = RemoveContactWindow(self, user_id=self.user.get_user_id())
+        if remove_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
             pass
 
     def set_status_label(self):
