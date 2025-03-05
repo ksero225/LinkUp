@@ -42,7 +42,7 @@ class LoginWindow(QDialog):
             print(data)
 
             try:
-                response = requests.post(api_link_login, json=data)
+                response = requests.post(api_link_login, json=data, timeout=5)
                 print(response.status_code)
                 print(response)
 
@@ -55,10 +55,10 @@ class LoginWindow(QDialog):
                     print(self.user.get_user_id())
                     print(self.user.get_user_contacts())
                     self.accept()
-                elif response.status_code == 401:
-                    show_error_message(f"Incorrect login or password")
                 else:
-                    show_error_message(f"Server connection error")
+                    show_error_message(f"Incorrect login or password")
+            except requests.exceptions.Timeout:
+                show_error_message(f"Request timed out. Please try again later.")
             except requests.exceptions.RequestException as e:
                 show_error_message(f"Error: {e}")
 

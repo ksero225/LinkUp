@@ -36,12 +36,14 @@ class AddContactWindow(QDialog):
         api_link_add_contact = get_new_contact_link(self.user_id, contact_id)
 
         try:
-            response = requests.patch(api_link_add_contact)
+            response = requests.patch(api_link_add_contact, timeout=5)
             print(response.status_code)
             print(response.text)
             if response.status_code == 200:
                 self.accept()
             else:
                 show_error_message("Error adding new contact!")
+        except requests.exceptions.Timeout:
+            show_error_message(f"Request timed out. Please try again later.")
         except requests.exceptions.RequestException as e:
             show_error_message(f"Error: {e}")
