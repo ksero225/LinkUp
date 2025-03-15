@@ -37,9 +37,12 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<UserDto> getUserOneById(@RequestParam(value = "userId") final String userId) {
         return userService.findOne(userId)
-                .map(user ->
-                        ResponseEntity.ok(userMapper.mapTo(user))
-                )
+                .map(user -> {
+                    UserDto userDto = userMapper.mapTo(user);
+                    List<ContactDto> userFriends = userService.idListToContactList(user.getUserFriendList());
+                    userDto.setUserFriendList(userFriends);
+                    return ResponseEntity.ok(userDto);
+                })
                 .orElseGet(() ->
                         new ResponseEntity<>(HttpStatus.NOT_FOUND)
                 );
@@ -50,8 +53,15 @@ public class UserController {
         final UserLoginRequest userLoginRequest = userLoginRequestMapper.mapFrom(requestBody);
 
         return userService.loginUser(userLoginRequest)
-                .map(user -> new ResponseEntity<>(userMapper.mapTo(user), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(user -> {
+                    UserDto userDto = userMapper.mapTo(user);
+                    List<ContactDto> userFriends = userService.idListToContactList(user.getUserFriendList());
+                    userDto.setUserFriendList(userFriends);
+                    return ResponseEntity.ok(userDto);
+                })
+                .orElseGet(() ->
+                        new ResponseEntity<>(HttpStatus.NOT_FOUND)
+                );
     }
 
     @PostMapping(path = "/register")
