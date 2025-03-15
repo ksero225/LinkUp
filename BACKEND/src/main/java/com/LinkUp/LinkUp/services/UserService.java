@@ -23,4 +23,5 @@ public interface UserService {
     List<ContactDto> addContact(String userId, String contactId);
 
     List<ContactDto> deleteContact(String userId, String contactId);
+    List<ContactDto> idListToContactList(List<String> idList);
 }

@@ -18,7 +18,6 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .userPassword(user.getUserPassword())
                 .userEmail(user.getUserEmail())
                 .isUserActive(user.isUserActive())
-                .userFriendList(user.getUserFriendList())
                 .build();
     }
 

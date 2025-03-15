@@ -143,6 +143,19 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ContactDto> idListToContactList(List<String> idList) {
+        List<User> foundUsers = userRepository.findAllById(idList);
+
+        return foundUsers.stream()
+                .map(user -> new ContactDto(
+                        user.getUserId(),
+                        user.getUserLogin(),
+                        user.getUserEmail(),
+                        user.isUserActive()
+                )).collect(Collectors.toList());
+    }
+
     private ContactDto mapFriendListIdsToContactDto(String contactId) {
         return userRepository.findById(contactId)
                 .map(user -> new ContactDto(
