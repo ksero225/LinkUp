@@ -1,4 +1,5 @@
 import sys
+import json
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
@@ -7,6 +8,7 @@ from LoginWindow import LoginWindow
 from RegisterWindow import RegisterWindow
 from AddContactWindow import AddContactWindow
 from RemoveContactWindow import RemoveContactWindow
+from WebSocketClient import WebSocketClient
 from User import User
 
 class MainWindow(QMainWindow):
@@ -16,6 +18,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.user = None
+        self.websocket_client = WebSocketClient("wss://linkup-rf0o.onrender.com/ws")
+        self.websocket_client.received_message.connect(self.receive_message)
 
         self.ui.actionAdd_new_contact.setEnabled(False)
         self.ui.actionDelete_contact.setEnabled(False)
@@ -24,6 +28,8 @@ class MainWindow(QMainWindow):
 
         self.ui.lineEdit.setText("Log in before start typing")
         self.ui.lineEdit.setReadOnly(True)
+
+        self.ui.lineEdit.returnPressed.connect(self.send_message)
 
         # Połączenie akcji w menu z oknem logowania
         self.ui.actionSign_in.triggered.connect(self.show_login_window)
@@ -44,6 +50,7 @@ class MainWindow(QMainWindow):
                 self.set_status_label()
                 self.ui.actionAdd_new_contact.setEnabled(True)
                 self.ui.actionDelete_contact.setEnabled(True)
+                self.websocket_client.start()
 
     def show_register_window(self):
         """Otwiera okno rejestracji"""
@@ -71,7 +78,50 @@ class MainWindow(QMainWindow):
 
     def add_contacts_to_widget(self):
         for contact in self.user.get_user_contacts():
-            self.ui.listWidget.addItem(contact)
+            self.ui.listWidget.addItem(contact['contactLogin'])
+
+    def send_message(self):
+        if not self.user:
+            return
+
+        recipient_item = self.ui.listWidget.currentItem()
+        if not recipient_item:  # Jeśli nie wybrano kontaktu
+            self.ui.textEdit.append('<p style="color: red;">Wybierz kontakt przed wysłaniem wiadomości!</p>')
+            return
+
+        recipient = recipient_item.text()  # Pobieramy login odbiorcy
+        message_text = self.ui.lineEdit.text().strip()
+        self.ui.lineEdit.clear()
+
+        if message_text:
+            message = {
+                'sender': self.user.get_user_id(),
+                'content': message_text,
+                'messageType': 'CHAT'
+            }
+            self.websocket_client.send_message(message)
+
+    def receive_message(self, message):
+        try:
+            # Odbieranie i deserializacja wiadomości JSON
+            message_data = json.loads(message)
+            sender = message_data.get('sender')
+            text = message_data.get('content')
+
+            if sender == self.user.get_user_login():
+                formatted_message = f'<p style="color: blue;"><b>Me:</b> {text}</p>'
+            else:
+                formatted_message = f'<p style="color: green;"><b>{sender}:</b> {text}</p>'
+
+            self.ui.textEdit.append(formatted_message)
+
+        except json.JSONDecodeError:
+            # Jeśli nie udało się zdekodować wiadomości (błąd w formacie JSON)
+            self.ui.textEdit.append('<p style="color: red;">Odebrano niepoprawną wiadomość!</p>')
+
+    def closeEvent(self, event):
+        self.websocket_client.stop()
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

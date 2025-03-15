@@ -1,3 +1,4 @@
 PySide6
 bcrypt
 requests
+stomp.py
