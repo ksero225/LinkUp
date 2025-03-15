@@ -69,13 +69,15 @@ class RegisterWindow(QDialog):
         print(data)
 
         try:
-            response = requests.post(api_link_register, json=data)
+            response = requests.post(api_link_register, json=data, timeout=5)
             print(response.status_code)
             print(response)
             if response.status_code == 200:
                 self.accept()
             else:
                 show_error_message("Registration error!")
+        except requests.exceptions.Timeout:
+            show_error_message(f"Request timed out. Please try again later.")
         except requests.exceptions.RequestException as e:
             show_error_message(f"Error: {e}")
 
