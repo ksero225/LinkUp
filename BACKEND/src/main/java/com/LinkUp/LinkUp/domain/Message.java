@@ -16,5 +16,6 @@ public class Message {
 
     private String content;
     private String sender;
+    private String recipient;
     private MessageType messageType;
 }
