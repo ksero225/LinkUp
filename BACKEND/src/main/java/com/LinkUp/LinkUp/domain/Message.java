@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Message {
-    private enum MessageType {
-        CHAT, LEAVE, JOIN
-    }
-
     private String content;
     private String sender;
-    private MessageType messageType;
+    private String recipient;
 }

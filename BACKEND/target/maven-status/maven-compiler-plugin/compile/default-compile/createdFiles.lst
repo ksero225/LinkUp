@@ -3,7 +3,6 @@ com\LinkUp\LinkUp\services\UserService.class
 com\LinkUp\LinkUp\controllers\UserController.class
 com\LinkUp\LinkUp\domain\documents\User.class
 com\LinkUp\LinkUp\domain\UserLoginRequest$UserLoginRequestBuilder.class
-com\LinkUp\LinkUp\domain\Message$MessageType.class
 com\LinkUp\LinkUp\domain\UserRegisterRequest.class
 com\LinkUp\LinkUp\mappers\impl\UserRegisterRequestMapper.class
 com\LinkUp\LinkUp\domain\Message$MessageBuilder.class
