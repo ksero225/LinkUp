@@ -22,7 +22,7 @@ class WebSocketStompClient(QThread):
         self.uri = uri
         self.ws = None
         self.connected = False
-        self.username = username  # Nazwa użytkownika do subskrypcji prywatnych wiadomości
+        self.username = username
 
     def run(self):
         self.ws = websocket.WebSocketApp(
@@ -60,13 +60,17 @@ class WebSocketStompClient(QThread):
         # Subskrypcja prywatnych wiadomości użytkownika
         private_subscribe_frame = stomp_frame("SUBSCRIBE", headers={
             "id": "sub-1",
-            "destination": f"/user/queue/messages"
+            "destination": f"/user/{self.username}/private"
         })
         ws.send(private_subscribe_frame)
         print(f"Subscribed to private messages for {self.username}.")
 
     def on_message(self, ws, message):
         print("Received message:", message)
+
+        if message.startswith("CONNECTED"):
+            return
+
         self.received_message.emit(message)
 
     def on_error(self, ws, error):

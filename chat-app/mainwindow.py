@@ -107,18 +107,25 @@ class MainWindow(QMainWindow):
 
             print(json.dumps(message))
             self.websocket_client.send_message(recipient, message_text)
+            self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
     def receive_message(self, message):
-        self.ui.textEdit.append(message)
         try:
-            message_data = json.loads(message)
+            # Usuwamy znak null i ewentualne białe znaki
+            message = message.rstrip('\x00').strip()
+
+            # Jeśli wiadomość zawiera nagłówki STOMP, wydziel tylko część z JSON
+            parts = message.split('\n\n', 1)
+            if len(parts) > 1:
+                json_part = parts[1].rstrip('\x00').strip()
+            else:
+                json_part = message
+
+            message_data = json.loads(json_part)
             sender = message_data.get('sender')
             text = message_data.get('content')
 
-            if sender == self.user.get_user_login():
-                formatted_message = f'<p style="color: blue;"><b>Me:</b> {text}</p>'
-            else:
-                formatted_message = f'<p style="color: green;"><b>{sender}:</b> {text}</p>'
+            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {text}</p>'
 
             self.ui.textEdit.append(formatted_message)
 
