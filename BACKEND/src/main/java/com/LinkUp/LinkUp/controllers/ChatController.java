@@ -19,6 +19,7 @@ public class ChatController {
 
     @MessageMapping("/chat.private")
     public void sendPrivateMessage(@Payload Message message){
+        System.out.println("SENDING PRIVATE MESSAGE: " + message);
         messagingTemplate.convertAndSendToUser(message.getRecipient(), "/queue/messages", message);
     }
 
