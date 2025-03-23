@@ -18,21 +18,10 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.private")
-    public void sendPrivateMessage(@Payload Message message){
-        System.out.println("SENDING PRIVATE MESSAGE: " + message);
+    public void sendPrivateMessage(@Payload Message message) {
+        System.out.println("MESSAGE RECIPIENT: " + message.getRecipient());
+        System.out.println("MESSAGE SENDER: " + message.getSender());
+
         messagingTemplate.convertAndSendToUser(message.getRecipient(), "/queue/messages", message);
     }
-
-//    @MessageMapping("/chat.register")
-//    @SendTo("/topic/public")
-//    public Message register(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", message.getSender());
-//        return message;
-//    }
-//
-//    @MessageMapping("/chat.send")
-//    @SendTo("/topic/public")
-//    public Message sendMessage(@Payload Message message) {
-//        return message;
-//    }
 }
