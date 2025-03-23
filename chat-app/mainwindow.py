@@ -8,7 +8,7 @@ from LoginWindow import LoginWindow
 from RegisterWindow import RegisterWindow
 from AddContactWindow import AddContactWindow
 from RemoveContactWindow import RemoveContactWindow
-from WebSocketClient import WebSocketClient
+from WebSocketClient import WebSocketStompClient
 from User import User
 
 class MainWindow(QMainWindow):
@@ -18,8 +18,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.user = None
-        self.websocket_client = WebSocketClient("wss://linkup-rf0o.onrender.com/ws")
-        self.websocket_client.received_message.connect(self.receive_message)
+        self.websocket_client = None
 
         self.ui.actionAdd_new_contact.setEnabled(False)
         self.ui.actionDelete_contact.setEnabled(False)
@@ -50,6 +49,9 @@ class MainWindow(QMainWindow):
                 self.set_status_label()
                 self.ui.actionAdd_new_contact.setEnabled(True)
                 self.ui.actionDelete_contact.setEnabled(True)
+                self.websocket_client = WebSocketStompClient("wss://linkup-rf0o.onrender.com/ws",
+                                                             self.user.get_user_login())
+                self.websocket_client.received_message.connect(self.receive_message)
                 self.websocket_client.start()
 
     def show_register_window(self):
@@ -80,6 +82,9 @@ class MainWindow(QMainWindow):
         for contact in self.user.get_user_contacts():
             self.ui.listWidget.addItem(contact['contactLogin'])
 
+        if self.ui.listWidget.count() > 0:
+            self.ui.listWidget.setCurrentRow(0)
+
     def send_message(self):
         if not self.user:
             return
@@ -95,15 +100,17 @@ class MainWindow(QMainWindow):
 
         if message_text:
             message = {
-                'sender': self.user.get_user_id(),
                 'content': message_text,
-                'messageType': 'CHAT'
+                'sender': self.user.get_user_login(),
+                'recipient': recipient
             }
-            self.websocket_client.send_message(message)
+
+            print(json.dumps(message))
+            self.websocket_client.send_message(recipient, message_text)
 
     def receive_message(self, message):
+        self.ui.textEdit.append(message)
         try:
-            # Odbieranie i deserializacja wiadomości JSON
             message_data = json.loads(message)
             sender = message_data.get('sender')
             text = message_data.get('content')
@@ -116,7 +123,6 @@ class MainWindow(QMainWindow):
             self.ui.textEdit.append(formatted_message)
 
         except json.JSONDecodeError:
-            # Jeśli nie udało się zdekodować wiadomości (błąd w formacie JSON)
             self.ui.textEdit.append('<p style="color: red;">Odebrano niepoprawną wiadomość!</p>')
 
     def closeEvent(self, event):
