@@ -60,7 +60,7 @@ class WebSocketStompClient(QThread):
         # Subskrypcja prywatnych wiadomości użytkownika
         private_subscribe_frame = stomp_frame("SUBSCRIBE", headers={
             "id": "sub-1",
-            "destination": f"/user/queue/messages"
+            "destination": f"/user/{self.username}/private"
         })
         ws.send(private_subscribe_frame)
         print(f"Subscribed to private messages for {self.username}.")

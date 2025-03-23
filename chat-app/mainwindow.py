@@ -110,10 +110,14 @@ class MainWindow(QMainWindow):
 
     def receive_message(self, message):
         self.ui.textEdit.append(message)
+        print(message)
         try:
             message_data = json.loads(message)
             sender = message_data.get('sender')
             text = message_data.get('content')
+
+            print(sender)
+            print(text)
 
             if sender == self.user.get_user_login():
                 formatted_message = f'<p style="color: blue;"><b>Me:</b> {text}</p>'
