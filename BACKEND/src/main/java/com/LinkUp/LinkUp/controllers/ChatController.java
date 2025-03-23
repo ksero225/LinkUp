@@ -11,27 +11,13 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class ChatController {
+
+    @Autowired
     SimpMessagingTemplate messagingTemplate;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
-
     @MessageMapping("/chat.private")
-    public void sendPrivateMessage(@Payload Message message){
-        messagingTemplate.convertAndSendToUser(message.getRecipient(), "/queue/messages", message);
-    }
+    public void sendPrivateMessage(@Payload Message message) {
 
-//    @MessageMapping("/chat.register")
-//    @SendTo("/topic/public")
-//    public Message register(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", message.getSender());
-//        return message;
-//    }
-//
-//    @MessageMapping("/chat.send")
-//    @SendTo("/topic/public")
-//    public Message sendMessage(@Payload Message message) {
-//        return message;
-//    }
+        messagingTemplate.convertAndSendToUser(message.getRecipient(), "/private", message);
+    }
 }
