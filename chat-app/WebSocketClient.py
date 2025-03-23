@@ -22,7 +22,7 @@ class WebSocketStompClient(QThread):
         self.uri = uri
         self.ws = None
         self.connected = False
-        self.username = username  # Nazwa użytkownika do subskrypcji prywatnych wiadomości
+        self.username = username
 
     def run(self):
         self.ws = websocket.WebSocketApp(
@@ -67,6 +67,10 @@ class WebSocketStompClient(QThread):
 
     def on_message(self, ws, message):
         print("Received message:", message)
+
+        if message.startswith("CONNECTED"):
+            return
+
         self.received_message.emit(message)
 
     def on_error(self, ws, error):
