@@ -18,6 +18,7 @@ com\LinkUp\LinkUp\domain\dtos\UserLoginRequestDto$UserLoginRequestDtoBuilder.cla
 com\LinkUp\LinkUp\LinkUpApplication.class
 com\LinkUp\LinkUp\config\WebSocketConfig.class
 com\LinkUp\LinkUp\domain\UserLoginRequest.class
+com\LinkUp\LinkUp\exceptions\GlobalExceptionHandler.class
 com\LinkUp\LinkUp\controllers\ChatController.class
 com\LinkUp\LinkUp\domain\documents\User$UserBuilder.class
 com\LinkUp\LinkUp\domain\UserRegisterRequest$UserRegisterRequestBuilder.class

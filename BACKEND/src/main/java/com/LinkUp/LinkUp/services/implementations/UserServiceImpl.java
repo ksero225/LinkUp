@@ -112,9 +112,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundContact);
         userRepository.save(foundUser);
 
-        return foundUser.getUserFriendList().stream()
-                .map(this::mapFriendListIdsToContactDto)
-                .collect(Collectors.toList());
+        return idListToContactList(foundUser.getUserFriendList());
     }
 
     @Override
@@ -139,9 +137,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundContact);
         userRepository.save(foundUser);
 
-        return foundUser.getUserFriendList().stream()
-                .map(this::mapFriendListIdsToContactDto)
-                .collect(Collectors.toList());
+        return idListToContactList(foundUser.getUserFriendList());
     }
 
     @Override

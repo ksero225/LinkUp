@@ -11,6 +11,7 @@ D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\dtos\UserRegisterReques
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\Message.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\UserLoginRequest.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\UserRegisterRequest.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\exceptions\GlobalExceptionHandler.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\LinkUpApplication.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\impl\UserLoginRequestMapper.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\impl\UserMapper.java

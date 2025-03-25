@@ -48,12 +48,8 @@ public class UserController {
             @Parameter(description = "Unique identifier of the user", example = "64b5f2e8c3a5d9e123456789")
             @RequestParam(value = "userId") final String userId) {
         return userService.findOne(userId)
-                .map(user -> {
-                    UserDto userDto = userMapper.mapTo(user);
-                    List<ContactDto> userFriends = userService.idListToContactList(user.getUserFriendList());
-                    userDto.setUserFriendList(userFriends);
-                    return ResponseEntity.ok(userDto);
-                })
+                .map(this::buildUserDto)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -70,12 +66,8 @@ public class UserController {
             @RequestBody UserLoginRequestDto requestBody) {
         final UserLoginRequest userLoginRequest = userLoginRequestMapper.mapFrom(requestBody);
         return userService.loginUser(userLoginRequest)
-                .map(user -> {
-                    UserDto userDto = userMapper.mapTo(user);
-                    List<ContactDto> userFriends = userService.idListToContactList(user.getUserFriendList());
-                    userDto.setUserFriendList(userFriends);
-                    return ResponseEntity.ok(userDto);
-                })
+                .map(this::buildUserDto)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -108,5 +100,11 @@ public class UserController {
             @RequestParam(value = "userId") final String userId) {
         userService.toggleUserStatus(userId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private UserDto buildUserDto(User user) {
+        UserDto dto = userMapper.mapTo(user);
+        dto.setUserFriendList(userService.idListToContactList(user.getUserFriendList()));
+        return dto;
     }
 }
