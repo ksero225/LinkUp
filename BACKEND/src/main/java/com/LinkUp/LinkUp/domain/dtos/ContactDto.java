@@ -14,4 +14,5 @@ public class ContactDto {
     private String contactLogin;
     private String contactEmail;
     private boolean isUserActive;
+    private String userPublicKey;
 }

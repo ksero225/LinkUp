@@ -74,6 +74,7 @@ public class UserServiceImpl implements UserService {
                 .userEmail(userRegisterRequest.getUserEmail())
                 .isUserActive(false)
                 .userFriendList(new ArrayList<>())
+                .userPublicKey(userRegisterRequest.getUserPublicKey())
                 .build();
 
         return userRepository.save(newUser);
@@ -152,7 +153,8 @@ public class UserServiceImpl implements UserService {
                         user.getUserId(),
                         user.getUserLogin(),
                         user.getUserEmail(),
-                        user.isUserActive()
+                        user.isUserActive(),
+                        user.getUserPublicKey()
                 )).collect(Collectors.toList());
     }
 
@@ -162,7 +164,8 @@ public class UserServiceImpl implements UserService {
                         user.getUserId(),
                         user.getUserLogin(),
                         user.getUserEmail(),
-                        user.isUserActive()
+                        user.isUserActive(),
+                        user.getUserPublicKey()
                 )).orElse(null);
     }
 }

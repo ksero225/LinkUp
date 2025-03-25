@@ -18,5 +18,6 @@ public class UserDto {
     private String userPassword;
     private String userEmail;
     private boolean isUserActive;
+    private String userPublicKey;
     private List<ContactDto> userFriendList;
 }

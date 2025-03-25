@@ -18,6 +18,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .userPassword(user.getUserPassword())
                 .userEmail(user.getUserEmail())
                 .isUserActive(user.isUserActive())
+                .userPublicKey(user.getUserPublicKey())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class UserMapper implements Mapper<User, UserDto> {
                 .userPassword(userDto.getUserPassword())
                 .userEmail(userDto.getUserEmail())
                 .isUserActive(userDto.isUserActive())
+                .userPublicKey(userDto.getUserPublicKey())
                 .build();
     }
 }

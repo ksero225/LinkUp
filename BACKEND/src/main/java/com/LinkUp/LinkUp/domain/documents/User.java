@@ -23,6 +23,7 @@ public class User {
     private String userPassword;
     private String userEmail;
     private boolean isUserActive;
+    private String userPublicKey;
 
     private List<String> userFriendList = new ArrayList<>();
 }
