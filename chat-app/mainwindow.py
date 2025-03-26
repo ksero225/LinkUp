@@ -2,6 +2,8 @@ import sys
 import json
 
 from PySide6.QtWidgets import QApplication, QMainWindow
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes
 
 from ui_form import Ui_MainWindow
 from LoginWindow import LoginWindow
@@ -9,6 +11,7 @@ from RegisterWindow import RegisterWindow
 from AddContactWindow import AddContactWindow
 from RemoveContactWindow import RemoveContactWindow
 from WebSocketClient import WebSocketStompClient
+from config import api_link_websocket
 from User import User
 
 class MainWindow(QMainWindow):
@@ -49,8 +52,7 @@ class MainWindow(QMainWindow):
                 self.set_status_label()
                 self.ui.actionAdd_new_contact.setEnabled(True)
                 self.ui.actionDelete_contact.setEnabled(True)
-                self.websocket_client = WebSocketStompClient("wss://linkup-rf0o.onrender.com/ws",
-                                                             self.user.get_user_login())
+                self.websocket_client = WebSocketStompClient(api_link_websocket, self.user.get_user_login())
                 self.websocket_client.received_message.connect(self.receive_message)
                 self.websocket_client.start()
 
@@ -82,55 +84,87 @@ class MainWindow(QMainWindow):
         for contact in self.user.get_user_contacts():
             self.ui.listWidget.addItem(contact['contactLogin'])
 
-        if self.ui.listWidget.count() > 0:
-            self.ui.listWidget.setCurrentRow(0)
-
     def send_message(self):
+        """Szyfruje wiadomość kluczem publicznym odbiorcy i wysyła ją."""
         if not self.user:
             return
 
         recipient_item = self.ui.listWidget.currentItem()
-        if not recipient_item:  # Jeśli nie wybrano kontaktu
-            self.ui.textEdit.append('<p style="color: red;">Wybierz kontakt przed wysłaniem wiadomości!</p>')
+        if not recipient_item:
+            self.ui.textEdit.append('<p style="color: red;">Select a contact before sending a message!</p>')
             return
 
-        recipient = recipient_item.text()  # Pobieramy login odbiorcy
+        recipient = recipient_item.text()
         message_text = self.ui.lineEdit.text().strip()
         self.ui.lineEdit.clear()
 
         if message_text:
-            message = {
-                'content': message_text,
-                'sender': self.user.get_user_login(),
-                'recipient': recipient
-            }
+            recipient_public_key = self.user.get_contact_public_key(recipient)
+            if not recipient_public_key:
+                self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
+                return
 
-            print(json.dumps(message))
-            self.websocket_client.send_message(recipient, message_text)
-            self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
+            try:
+                encrypted_message = recipient_public_key.encrypt(
+                    message_text.encode(),
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
+
+                from base64 import b64encode
+                encrypted_message_base64 = b64encode(encrypted_message).decode()
+
+                message = {
+                    'content': encrypted_message_base64,
+                    'sender': self.user.get_user_login(),
+                    'recipient': recipient
+                }
+
+                print(json.dumps(message))
+                self.websocket_client.send_message(recipient, encrypted_message_base64)
+                self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
+
+            except Exception as e:
+                self.ui.textEdit.append(f'<p style="color: red;">Encryption error: {str(e)}</p>')
 
     def receive_message(self, message):
+        """Odszyfrowuje wiadomość kluczem prywatnym użytkownika po jej odebraniu."""
         try:
             # Usuwamy znak null i ewentualne białe znaki
             message = message.rstrip('\x00').strip()
 
             # Jeśli wiadomość zawiera nagłówki STOMP, wydziel tylko część z JSON
             parts = message.split('\n\n', 1)
-            if len(parts) > 1:
-                json_part = parts[1].rstrip('\x00').strip()
-            else:
-                json_part = message
+            json_part = parts[1].strip() if len(parts) > 1 else message
 
             message_data = json.loads(json_part)
             sender = message_data.get('sender')
-            text = message_data.get('content')
+            encrypted_text = message_data.get('content')
 
-            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {text}</p>'
+            # Odszyfrowanie wiadomości kluczem prywatnym użytkownika
+            from base64 import b64decode
+            encrypted_bytes = b64decode(encrypted_text)
 
+            decrypted_message = self.user._private_key.decrypt(
+                encrypted_bytes,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            ).decode()
+
+            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {decrypted_message}</p>'
             self.ui.textEdit.append(formatted_message)
 
         except json.JSONDecodeError:
-            self.ui.textEdit.append('<p style="color: red;">Odebrano niepoprawną wiadomość!</p>')
+            self.ui.textEdit.append('<p style="color: red;">Invalid message received!</p>')
+
+        except Exception as e:
+            self.ui.textEdit.append(f'<p style="color: red;">Decryption error: {str(e)}</p>')
 
     def closeEvent(self, event):
         self.websocket_client.stop()

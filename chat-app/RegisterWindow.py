@@ -2,6 +2,8 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButt
 import requests
 from config import api_link_register
 from ErrorHandler import show_error_message
+from User import User
+import base64
 
 class RegisterWindow(QDialog):
     def __init__(self, parent=None):
@@ -65,7 +67,11 @@ class RegisterWindow(QDialog):
             show_error_message("Passwords are not identical!")
             return
 
-        data = {"userLogin": username, "userEmail": email, "userPassword": password}
+        user = User(None, username, email, None, password)
+        public_key_bytes = user.get_public_key_pem()
+        public_key_str = base64.b64encode(public_key_bytes).decode()
+
+        data = {"userLogin": username, "userEmail": email, "userPassword": password, "userPublicKey": public_key_str}
         print(data)
 
         try:
