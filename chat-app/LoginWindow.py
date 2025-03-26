@@ -48,7 +48,7 @@ class LoginWindow(QDialog):
 
                 if response.status_code == 200:
                     response_data = response.json()
-                    self.user = User(response_data["userId"], response_data["userLogin"], response_data["userEmail"], response_data["userFriendList"])
+                    self.user = User(response_data["userId"], response_data["userLogin"], response_data["userEmail"], response_data["userFriendList"], password)
 
                     print(self.user.get_user_login())
                     print(self.user.get_user_email())
