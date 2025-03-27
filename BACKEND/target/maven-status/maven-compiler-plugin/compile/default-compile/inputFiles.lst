@@ -1,14 +1,15 @@
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\config\SecurityConfig.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\config\WebSocketConfig.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\controllers\ChatController.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\controllers\MessageHistoryController.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\controllers\UserController.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\controllers\UserFriendListController.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\documents\Message.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\documents\User.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\dtos\ContactDto.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\dtos\UserDto.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\dtos\UserLoginRequestDto.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\dtos\UserRegisterRequestDto.java
-D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\Message.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\UserLoginRequest.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\domain\UserRegisterRequest.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\exceptions\GlobalExceptionHandler.java
@@ -17,6 +18,9 @@ D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\impl\UserLoginRequestM
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\impl\UserMapper.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\impl\UserRegisterRequestMapper.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\mappers\Mapper.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\repositories\MessageRepository.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\repositories\UserRepository.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\services\implementations\MessageServiceImpl.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\services\implementations\UserServiceImpl.java
+D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\services\MessageService.java
 D:\LinkUp\BACKEND\src\main\java\com\LinkUp\LinkUp\services\UserService.java
