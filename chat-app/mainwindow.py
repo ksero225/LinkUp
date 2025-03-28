@@ -1,5 +1,6 @@
 import sys
 import json
+import requests
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -21,6 +22,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.user = None
+        self.selected_contact = None
         self.websocket_client = None
 
         self.ui.actionAdd_new_contact.setEnabled(False)
@@ -38,6 +40,7 @@ class MainWindow(QMainWindow):
         self.ui.actionSign_up.triggered.connect(self.show_register_window)
         self.ui.actionAdd_new_contact.triggered.connect(self.show_add_contact_window)
         self.ui.actionDelete_contact.triggered.connect(self.show_remove_contact_window)
+        self.ui.listWidget.currentItemChanged.connect(self.on_contact_changed)
 
     def show_login_window(self):
         """Otwiera okno logowania i dodaje użytkownika do listy"""
@@ -64,9 +67,11 @@ class MainWindow(QMainWindow):
 
     def show_add_contact_window(self):
         """Otwiera okno dodawania kontaktu"""
-        new_contact_window = AddContactWindow(self, user_id=self.user.get_user_id())
+        new_contact_window = AddContactWindow(self, user=self.user)
         if new_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
-            pass
+            new_contact = new_contact_window.new_contact
+            if new_contact:
+                self.ui.listWidget.addItem(new_contact['contactLogin'])
 
     def show_remove_contact_window(self):
         """Otwiera okno usuwania kontaktu"""
@@ -99,32 +104,33 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit.clear()
 
         if message_text:
-            recipient_public_key = self.user.get_contact_public_key(recipient)
-            if not recipient_public_key:
-                self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
-                return
+            #recipient_public_key = self.user.get_contact_public_key(recipient)
+            #if not recipient_public_key:
+            #    self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
+            #    return
 
             try:
-                encrypted_message = recipient_public_key.encrypt(
-                    message_text.encode(),
-                    padding.OAEP(
-                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                        algorithm=hashes.SHA256(),
-                        label=None
-                    )
-                )
+                #encrypted_message = recipient_public_key.encrypt(
+                #    message_text.encode(),
+                #    padding.OAEP(
+                #        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                #        algorithm=hashes.SHA256(),
+                #        label=None
+                #    )
+                #)
 
-                from base64 import b64encode
-                encrypted_message_base64 = b64encode(encrypted_message).decode()
+                #from base64 import b64encode
+                #encrypted_message_base64 = b64encode(encrypted_message).decode()
 
                 message = {
-                    'content': encrypted_message_base64,
+                    #'content': encrypted_message_base64,
+                    'content': message_text,
                     'sender': self.user.get_user_login(),
                     'recipient': recipient
                 }
 
                 print(json.dumps(message))
-                self.websocket_client.send_message(recipient, encrypted_message_base64)
+                self.websocket_client.send_message(recipient, message_text)
                 self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
             except Exception as e:
@@ -145,20 +151,21 @@ class MainWindow(QMainWindow):
             encrypted_text = message_data.get('content')
 
             # Odszyfrowanie wiadomości kluczem prywatnym użytkownika
-            from base64 import b64decode
-            encrypted_bytes = b64decode(encrypted_text)
+            #from base64 import b64decode
+            #encrypted_bytes = b64decode(encrypted_text)
 
-            decrypted_message = self.user._private_key.decrypt(
-                encrypted_bytes,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
-                )
-            ).decode()
+            #decrypted_message = self.user._private_key.decrypt(
+            #    encrypted_bytes,
+            #    padding.OAEP(
+            #        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            #        algorithm=hashes.SHA256(),
+            #        label=None
+            #    )
+            #).decode()
 
-            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {decrypted_message}</p>'
-            self.ui.textEdit.append(formatted_message)
+            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {encrypted_text}</p>'
+            if self.selected_contact == sender:
+                self.ui.textEdit.append(formatted_message)
 
         except json.JSONDecodeError:
             self.ui.textEdit.append('<p style="color: red;">Invalid message received!</p>')
@@ -167,8 +174,41 @@ class MainWindow(QMainWindow):
             self.ui.textEdit.append(f'<p style="color: red;">Decryption error: {str(e)}</p>')
 
     def closeEvent(self, event):
-        self.websocket_client.stop()
+        self.websocket_client.stop_client()
         event.accept()
+
+    def on_contact_changed(self, current, previous):
+        """Czyści textEdit i ładuje wiadomości od wybranego kontaktu z API."""
+        self.ui.textEdit.clear()
+
+        if not current or not self.user:
+            return
+
+        selected_contact = current.text()
+        self.selected_contact = selected_contact
+        sender = self.user.get_user_login()
+        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={selected_contact}&page=0&size=20"
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Rzuci wyjątek przy błędzie HTTP
+
+            data = response.json()
+            messages = data.get('content', [])  # Pobranie listy wiadomości
+
+            if not messages:
+                self.ui.textEdit.append('<p style="color: gray;">No messages found.</p>')
+                return
+
+            for msg in reversed(messages):
+                sender = msg.get('sender', 'Unknown')
+                content = msg.get('content', '')
+                color = "blue" if sender == self.user.get_user_login() else "green"
+                self.ui.textEdit.append(f'<p style="color: {color};"><b>{sender}:</b> {content}</p>')
+
+        except requests.exceptions.RequestException as e:
+            self.ui.textEdit.append(f'<p style="color: red;">Error fetching messages: {str(e)}</p>')
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

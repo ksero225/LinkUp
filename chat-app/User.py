@@ -1,7 +1,8 @@
 import os
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-import base64
+from base64 import b64decode
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 class User:
     def __init__(self, userId: str, userLogin: str, userEmail: str, userFriendList: list, userPassword: str):
@@ -68,7 +69,7 @@ class User:
     def get_contact_public_key(self, recipient):
         for contact in self._userContacts:
             if contact['contactLogin'] == recipient:
-                public_key_bytes = base64.b64decode(contact['userPublicKey'])
+                public_key_bytes = b64decode(contact['userPublicKey'])
                 return serialization.load_pem_public_key(public_key_bytes)
 
     def get_user_id(self):
