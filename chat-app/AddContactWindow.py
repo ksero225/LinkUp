@@ -2,16 +2,20 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButt
 import requests
 from config import get_new_contact_link
 from ErrorHandler import show_error_message
+from User import User
 
 class AddContactWindow(QDialog):
-    def __init__(self, parent=None, user_id=None):
+    def __init__(self, parent=None, user: User = None):
         super().__init__(parent)
         self.setWindowTitle("Add Contact")
         self.setFixedSize(300, 150)
 
+        self.new_contact = None
+
         layout = QVBoxLayout(self)
 
-        self.user_id = user_id
+        self.user_id = user.get_user_id()
+        self.user_contacts = user.get_user_contacts()
 
         # Pole ID kontaktu
         self.label_contact_id = QLabel("Contact ID:")
@@ -37,9 +41,15 @@ class AddContactWindow(QDialog):
 
         try:
             response = requests.patch(api_link_add_contact, timeout=5)
-            print(response.status_code)
-            print(response.text)
+
             if response.status_code == 200:
+                new_contact_data = response.json()
+                print(new_contact_data)
+
+                if isinstance(new_contact_data, list) and new_contact_data:
+                    new_contact_data = new_contact_data[-1]
+                self.new_contact = new_contact_data  # Zapisujemy nowy kontakt
+                self.user_contacts.append(new_contact_data)
                 self.accept()
             else:
                 show_error_message("Error adding new contact!")
