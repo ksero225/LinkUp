@@ -9,55 +9,41 @@ body {
     color: #FFFFFF;
     text-align: center;
     overflow: hidden;
-    background: linear-gradient(45deg, #C0B8AE, #D6C8BF, #B0A7A0, #C8BDB6);
+    background: linear-gradient(45deg, #3A5BA0, #4F80A1, #708A91, #C1C8C8);
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease infinite;
+
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease infinite;
+
     background-size: 400% 400%;
     animation: gradientShift 10s ease infinite;
 }
 
 @keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
 }
 
-
-.container {
+.mainContainer {
     background: rgba(255, 255, 255, 0.2);
     padding: 20px 40px;
     border-radius: 10px;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    position: relative;
     opacity: 0;
     animation: containerBreathing 10s ease-in-out infinite, containerFadeIn 1s forwards 0.5s;
 }
 
-
 @keyframes containerBreathing {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 @keyframes containerFadeIn {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 .border-animation {
@@ -69,119 +55,16 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
     animation: borderFlow 4s linear infinite;
-    pointer-events: none;
 }
 
 @keyframes borderFlow {
-    0% {
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-    }
-    100% {
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    }
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
 }
 
-h1 {
-    font-size: 2.5rem;
-    margin: 0 0 10px;
-    opacity: 0;
-    animation: slideIn 1s ease-out forwards 1s;
-}
+h1 { font-size: 2.5rem; animation: slideIn 1s ease-out forwards 1s; }
 
-@keyframes slideIn {
-    0% {
-        transform: translateY(-30px);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
 
-p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #F1C232;
-}
-
-a {
-    text-decoration: none;
-    font-size: 40px;
-    color: #E74C3C; /* Intense Red for a bold link */
-    transition: color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    opacity: 0;
-    animation: fadeInLink 1s ease-out forwards 1.5s;
-}
-
-@keyframes fadeInLink {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-.link {
-    position: relative;
-    display: inline-block;
-    text-decoration: none;
-    font-size: 40px;
-    color: #E74C3C;
-    transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.link:hover {
-    color: #FF5733;
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* Add subtle glow */
-}
-
-.tooltip {
-    position: absolute;
-    left: 50%;
-    top: 120%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #F1C232;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.link:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(-10px);
-}
-
-@keyframes fadeInCircle {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-/* Nowy styl stopki – ciemna paleta */
 .footer {
     position: absolute;
     bottom: 0;
@@ -189,13 +72,10 @@ a {
     background: linear-gradient(135deg, #2d2d2d, #000);
     color: #fff;
     padding: 20px 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
     font-family: 'Lora', serif;
 }
 
 .footer-container {
-    max-width: 1000px;
-    margin: 0 auto;
     display: flex;
     justify-content: center;
     gap: 50px;
@@ -204,27 +84,54 @@ a {
 
 .footer-social {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
 }
 
 .footer-social a {
     color: #fff;
     text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
     font-size: 16px;
-    transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .footer-social a:hover {
     color: #ccc;
-    transform: translateY(-3px);
 }
 
-.footer-social i {
-    font-size: 20px;
+.vertical-bar {
+    color: #fff;
 }
 
+.footer-social a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease, font-size 0.3s ease;
+}
+
+.link {
+    text-decoration: none;
+    font-size: 50px; /* Zwiększony rozmiar tekstu */
+    color: #E74C3C; /* Czerwonawy kolor */
+    transition: color 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    animation: fadeInLink 1s ease-out forwards 1.5s;
+}
+
+.link:hover {
+    color: #FF5733; /* Jaśniejszy czerwony przy hoverze */
+    transform: scale(1.1);
+}
+
+.link-text {
+    font-size: 60px; /* Zwiększenie napisu "LinkUp" */
+    font-weight: bold;
+    color: #E74C3C; /* Czerwonawy kolor */
+    opacity: 0;
+    animation: fadeInLink 1s ease-out forwards 1.5s;
+}
+
+@keyframes fadeInLink {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}

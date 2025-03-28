@@ -2,46 +2,44 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Welcome to the website</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-    <div class="border-animation"></div>
-    <h1>Welcome to the home page!</h1>
-    <a href="https://github.com/ksero225/LinkUp" target="_blank" class="link">
-        <b>LinkUp</b>
-        <i class="fa" style="font-size: 40px">&#xf09b;</i>
-        <span class="tooltip">For more specific info, Head up to this link!</span>
-    </a>
+
+<div class="mainContainer text-center">
+    <div class="container-box">
+        <h1>Welcome to the home page!</h1>
+        <a href="https://github.com/ksero225/LinkUp" target="_blank" class="link d-block mt-3">
+            <span class="link-text"><b>LinkUp</b></span> <i class="fa fa-github" style="font-size: 60px"></i>
+        </a>
+    </div>
 </div>
 
-<!-- Static Footer Section -->
-<footer class="footer">
-    <div class="footer-container">
+<footer class="footer text-center mt-4">
+    <div class="container d-flex justify-content-center align-items-center gap-4">
         <div class="footer-social">
-            <a href="" target="_blank">
-                <i class="fa fa-github"></i>
-                <span>Ksero225</span>
+            <a href="https://github.com/ksero225" class="text-white" target="_blank">
+                <i class="fa fa-github"></i> Ksero225
             </a>
-            <a href="" target="_blank">
+            <a href="https://www.linkedin.com/in/pawe%C5%82-michalski-9149452a7/" class="text-white" target="_blank">
                 <i class="fa fa-linkedin"></i>
             </a>
         </div>
+        <span class="vertical-bar">|</span>
         <div class="footer-social">
-            <a href="" target="_blank">
-                <i class="fa fa-github"></i>
-                <span>Benquuu</span>
-            </a>
-            <a href="" target="_blank">
+            <a href="https://www.linkedin.com/in/micha%C5%82-kolczak-40ab8b279/" class="text-white" target="_blank">
                 <i class="fa fa-linkedin"></i>
             </a>
+            <a href="https://github.com/benQUUU" class="text-white" target="_blank">Benquuu <i class="fa fa-github"></i></a>
         </div>
     </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
