@@ -28,6 +28,6 @@ public class MessageHistoryController {
             @RequestParam(defaultValue = "20") int size
     ){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
-        return messageService.findBySenderAndRecipientOrRecipientAndSender(sender, recipient, recipient, sender, pageable);
+        return messageService.findBySenderAndRecipientOrRecipientAndSender(sender, recipient, pageable);
     }
 }

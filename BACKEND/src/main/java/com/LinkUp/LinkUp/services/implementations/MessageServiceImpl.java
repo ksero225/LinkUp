@@ -21,13 +21,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Page<Message> findBySenderAndRecipientOrRecipientAndSender(String sender, String recipient, String recipient1, String sender1, Pageable pageable) {
-        return messageRepository.findBySenderAndRecipientOrRecipientAndSender(
-                sender,
-                recipient,
-                recipient1,
-                sender1,
-                pageable
-        );
+    public Page<Message> findBySenderAndRecipientOrRecipientAndSender(String sender, String recipient, Pageable pageable) {
+        return messageRepository.findBySenderAndRecipientOrRecipientAndSender(sender, recipient, pageable);
+
     }
 }

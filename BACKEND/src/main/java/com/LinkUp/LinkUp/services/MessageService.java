@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 public interface MessageService {
     void save(Message message);
 
-    Page<Message> findBySenderAndRecipientOrRecipientAndSender(String sender, String recipient, String recipient1, String sender1, Pageable pageable);
+    Page<Message> findBySenderAndRecipientOrRecipientAndSender(String sender, String recipient, Pageable pageable);
 }
