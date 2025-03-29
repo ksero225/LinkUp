@@ -12,7 +12,8 @@ LinkUp is a chat application designed to connect people seamlessly. With a simpl
 - [ ]   Custom installator.
 - [ ]   Redis for caching.
 - [ ]   Performance upgrades.
-- [ ]   Chat history.
+- [X]   Chat history.
+- [ ]   Email verification.
 
 ## Technologies
 
