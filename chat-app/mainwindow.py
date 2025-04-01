@@ -2,7 +2,8 @@ import sys
 import json
 import requests
 
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon
+from PySide6.QtGui import QIcon
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
@@ -20,6 +21,10 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon("assets/icon.jpg"))
+        self.tray_icon.setVisible(True)
 
         self.user = None
         self.selected_contact = None
@@ -164,8 +169,17 @@ class MainWindow(QMainWindow):
             #).decode()
 
             formatted_message = f'<p style="color: green;"><b>{sender}:</b> {encrypted_text}</p>'
+
             if self.selected_contact == sender:
                 self.ui.textEdit.append(formatted_message)
+
+            if self.tray_icon.isVisible():
+                self.tray_icon.showMessage(
+                    f"New message from {sender}",
+                    encrypted_text,
+                    QSystemTrayIcon.Information,
+                    5000
+                )
 
         except json.JSONDecodeError:
             self.ui.textEdit.append('<p style="color: red;">Invalid message received!</p>')
@@ -212,6 +226,10 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setApplicationName("LinkUp Messenger")
+    app.setApplicationDisplayName("LinkUp")
+    app.setWindowIcon(QIcon("assets/icon.jpg"))
+
     widget = MainWindow()
     widget.show()
     sys.exit(app.exec())
