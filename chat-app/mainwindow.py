@@ -1,5 +1,7 @@
 import sys
 import json
+from base64 import b64encode
+
 import requests
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon
@@ -110,31 +112,12 @@ class MainWindow(QMainWindow):
 
         if message_text:
             #recipient_public_key = self.user.get_contact_public_key(recipient)
+
             #if not recipient_public_key:
             #    self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
             #    return
 
             try:
-                #encrypted_message = recipient_public_key.encrypt(
-                #    message_text.encode(),
-                #    padding.OAEP(
-                #        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                #        algorithm=hashes.SHA256(),
-                #        label=None
-                #    )
-                #)
-
-                #from base64 import b64encode
-                #encrypted_message_base64 = b64encode(encrypted_message).decode()
-
-                message = {
-                    #'content': encrypted_message_base64,
-                    'content': message_text,
-                    'sender': self.user.get_user_login(),
-                    'recipient': recipient
-                }
-
-                print(json.dumps(message))
                 self.websocket_client.send_message(recipient, message_text)
                 self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
@@ -154,19 +137,6 @@ class MainWindow(QMainWindow):
             message_data = json.loads(json_part)
             sender = message_data.get('sender')
             encrypted_text = message_data.get('content')
-
-            # Odszyfrowanie wiadomości kluczem prywatnym użytkownika
-            #from base64 import b64decode
-            #encrypted_bytes = b64decode(encrypted_text)
-
-            #decrypted_message = self.user._private_key.decrypt(
-            #    encrypted_bytes,
-            #    padding.OAEP(
-            #        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            #        algorithm=hashes.SHA256(),
-            #        label=None
-            #    )
-            #).decode()
 
             formatted_message = f'<p style="color: green;"><b>{sender}:</b> {encrypted_text}</p>'
 

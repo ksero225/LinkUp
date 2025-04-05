@@ -1,11 +1,9 @@
+from crypto_utils import CryptoUtils
 import os
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import serialization, hashes
 from base64 import b64decode
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 class User:
-    def __init__(self, userId: str, userLogin: str, userEmail: str, userFriendList: list, userPassword: str):
+    def __init__(self, userId, userLogin, userEmail, userFriendList, userPassword):
         self._userId = userId
         self._userLogin = userLogin
         self._userEmail = userEmail
@@ -15,7 +13,6 @@ class User:
         self._private_key = None
         self._public_key = None
 
-        # Sprawdzenie, czy klucz prywatny już istnieje
         if os.path.exists(f"{self._userLogin}_private_key.pem"):
             self.load_private_key()
         else:
@@ -23,54 +20,30 @@ class User:
             self.save_private_key()
 
     def generate_keys(self):
-        """Generuje nową parę kluczy RSA"""
-        self._private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048
-        )
-        self._public_key = self._private_key.public_key()
+        self._private_key, self._public_key = CryptoUtils.generate_rsa_keypair()
 
     def save_private_key(self):
-        """Zapisuje klucz prywatny do pliku (zaszyfrowany hasłem)"""
         with open(f"{self._userLogin}_private_key.pem", "wb") as f:
-            f.write(self._private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.BestAvailableEncryption(self._userPassword.encode())
-            ))
+            f.write(CryptoUtils.serialize_private_key(self._private_key, self._userPassword))
 
     def load_private_key(self):
-        """Wczytuje klucz prywatny z pliku"""
         with open(f"{self._userLogin}_private_key.pem", "rb") as f:
-            self._private_key = serialization.load_pem_private_key(
-                f.read(),
-                password=self._userPassword.encode()
-            )
+            self._private_key = CryptoUtils.load_private_key_from_pem(f.read(), self._userPassword)
         self._public_key = self._private_key.public_key()
 
     def get_public_key_pem(self):
-        """Zwraca klucz publiczny w formacie PEM (gotowy do wysłania do API)"""
-        return self._public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        )
-
-    def decrypt_aes_key(self, encrypted_key):
-        """Odszyfrowuje klucz AES za pomocą klucza prywatnego"""
-        return self._private_key.decrypt(
-            encrypted_key,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
+        return CryptoUtils.serialize_public_key(self._public_key)
 
     def get_contact_public_key(self, recipient):
         for contact in self._userContacts:
             if contact['contactLogin'] == recipient:
-                public_key_bytes = b64decode(contact['userPublicKey'])
-                return serialization.load_pem_public_key(public_key_bytes)
+                return CryptoUtils.load_public_key_from_pem(b64decode(contact['userPublicKey']))
+
+    def encrypt_message(self, message, recipient_public_key):
+        return CryptoUtils.encrypt_message(message, recipient_public_key, self._public_key)
+
+    def decrypt_message(self, encrypted_data):
+        return CryptoUtils.decrypt_message(encrypted_data, self._private_key)
 
     def get_user_id(self):
         return self._userId
