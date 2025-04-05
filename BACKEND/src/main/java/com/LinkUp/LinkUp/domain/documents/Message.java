@@ -17,8 +17,11 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     private String id;
-    private String content;
     private String sender;
     private String recipient;
+    private String encryptedMessage;
+    private String iv;
+    private String keyForRecipient;
+    private String keyForSender;
     private LocalDateTime timestamp;
 }
