@@ -111,18 +111,14 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit.clear()
 
         if message_text:
-            #recipient_public_key = self.user.get_contact_public_key(recipient)
+            recipient_public_key = self.user.get_contact_public_key(recipient)
+            if not recipient_public_key:
+                self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
+                return
 
-            #if not recipient_public_key:
-            #    self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
-            #    return
-
-            try:
-                self.websocket_client.send_message(recipient, message_text)
-                self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
-
-            except Exception as e:
-                self.ui.textEdit.append(f'<p style="color: red;">Encryption error: {str(e)}</p>')
+            encrypted_data = self.user.encrypt_message(message_text, recipient_public_key)
+            self.websocket_client.send_message(recipient, json.dumps(encrypted_data))
+            self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
     def receive_message(self, message):
         """Odszyfrowuje wiadomość kluczem prywatnym użytkownika po jej odebraniu."""
@@ -135,10 +131,15 @@ class MainWindow(QMainWindow):
             json_part = parts[1].strip() if len(parts) > 1 else message
 
             message_data = json.loads(json_part)
-            sender = message_data.get('sender')
-            encrypted_text = message_data.get('content')
 
-            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {encrypted_text}</p>'
+            print(message_data)
+
+            sender = message_data.get('sender')
+            encrypted_data = message_data.get('content')
+
+            decrypted_message = self.user.decrypt_message(json.loads(encrypted_data))
+
+            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {decrypted_message}</p>'
 
             if self.selected_contact == sender:
                 self.ui.textEdit.append(formatted_message)
@@ -146,7 +147,7 @@ class MainWindow(QMainWindow):
             if self.tray_icon.isVisible():
                 self.tray_icon.showMessage(
                     f"New message from {sender}",
-                    encrypted_text,
+                    decrypted_message,
                     QSystemTrayIcon.Information,
                     5000
                 )
@@ -170,25 +171,38 @@ class MainWindow(QMainWindow):
 
         selected_contact = current.text()
         self.selected_contact = selected_contact
-        sender = self.user.get_user_login()
-        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={selected_contact}&page=0&size=20"
+        sender_login = self.user.get_user_login()
+        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender_login}&recipient={selected_contact}&page=0&size=20"
 
         try:
             response = requests.get(url)
-            response.raise_for_status()  # Rzuci wyjątek przy błędzie HTTP
-
+            response.raise_for_status()
             data = response.json()
-            messages = data.get('content', [])  # Pobranie listy wiadomości
+            messages = data.get('content', [])
 
             if not messages:
                 self.ui.textEdit.append('<p style="color: gray;">No messages found.</p>')
                 return
 
             for msg in reversed(messages):
-                sender = msg.get('sender', 'Unknown')
-                content = msg.get('content', '')
-                color = "blue" if sender == self.user.get_user_login() else "green"
-                self.ui.textEdit.append(f'<p style="color: {color};"><b>{sender}:</b> {content}</p>')
+                try:
+                    content_str = msg.get("content", "{}")
+                    encrypted_data = json.loads(content_str)
+
+                    decrypted_text = self.user.decrypt_message(encrypted_data)
+                    sender = msg.get("sender", "Unknown")
+
+                    if sender == sender_login:
+                        color = "blue"
+                        sender = "Me"
+                    else:
+                        color = "green"
+
+                    self.ui.textEdit.append(f'<p style="color: {color};"><b>{sender}:</b> {decrypted_text}</p>')
+
+                except Exception as e:
+                    sender = msg.get("sender", "Unknown")
+                    self.ui.textEdit.append(f'<p style="color: red;">[Error decrypting message from {sender}]</p>')
 
         except requests.exceptions.RequestException as e:
             self.ui.textEdit.append(f'<p style="color: red;">Error fetching messages: {str(e)}</p>')
