@@ -31,7 +31,8 @@ LinkUp is a chat application designed to connect people seamlessly. With a simpl
 
 **Frontend**
 
-- **Python X.X**
+- **Python3**
+- **PySide6**
   ...
 
 ## Features
