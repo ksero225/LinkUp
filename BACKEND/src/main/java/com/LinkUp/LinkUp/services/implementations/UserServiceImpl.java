@@ -4,6 +4,7 @@ import com.LinkUp.LinkUp.domain.UserLoginRequest;
 import com.LinkUp.LinkUp.domain.UserRegisterRequest;
 import com.LinkUp.LinkUp.domain.documents.User;
 import com.LinkUp.LinkUp.domain.dtos.ContactDto;
+import com.LinkUp.LinkUp.domain.enums.ContactOperation;
 import com.LinkUp.LinkUp.repositories.UserRepository;
 import com.LinkUp.LinkUp.services.UserService;
 import lombok.AllArgsConstructor;
@@ -91,51 +92,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<ContactDto> addContact(String userId, String contactId) {
-        User foundUser = userRepository.findById(userId)
+    public List<ContactDto> updateContact(String userLogin, String contactLogin, ContactOperation operation) {
+        if (userLogin.equals(contactLogin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot add or remove yourself.");
+        }
+
+        User foundUser = userRepository.findUserByUserLogin(userLogin)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
-        User foundContact = userRepository.findById(contactId)
+        User foundContact = userRepository.findUserByUserLogin(contactLogin)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found."));
 
-        if (userId.equals(contactId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot add yourself.");
+        if (operation == ContactOperation.ADD) {
+            if (foundUser.getUserFriendList().contains(foundContact.getUserId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "This contact is already in users friend list."
+                );
+            }
+            foundUser.getUserFriendList().add(foundContact.getUserId());
+            foundContact.getUserFriendList().add(foundUser.getUserId());
+        } else if (operation == ContactOperation.DELETE) {
+            if (!foundUser.getUserFriendList().contains(foundContact.getUserId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "This contact is not on your friend list."
+                );
+            }
+            foundUser.getUserFriendList().remove(foundContact.getUserId());
+            foundContact.getUserFriendList().remove(foundUser.getUserId());
         }
 
-        if (foundUser.getUserFriendList().contains(contactId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This contact is already in your friend list.");
-        }
-
-        foundUser.getUserFriendList().add(contactId);
-        foundContact.getUserFriendList().add(userId);
-
-        userRepository.save(foundContact);
         userRepository.save(foundUser);
-
-        return idListToContactList(foundUser.getUserFriendList());
-    }
-
-    @Override
-    public List<ContactDto> deleteContact(String userId, String contactId) {
-        User foundUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
-
-        User foundContact = userRepository.findById(contactId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found."));
-
-        if (userId.equals(contactId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot delete yourself.");
-        }
-
-        if (!foundUser.getUserFriendList().contains(contactId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This contact is not on your friends list..");
-        }
-
-        foundUser.getUserFriendList().remove(contactId);
-        foundContact.getUserFriendList().remove(userId);
-
         userRepository.save(foundContact);
-        userRepository.save(foundUser);
 
         return idListToContactList(foundUser.getUserFriendList());
     }

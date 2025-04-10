@@ -5,6 +5,7 @@ import com.LinkUp.LinkUp.domain.UserRegisterRequest;
 import com.LinkUp.LinkUp.domain.documents.User;
 import com.LinkUp.LinkUp.domain.dtos.ContactDto;
 import com.LinkUp.LinkUp.domain.dtos.UserDto;
+import com.LinkUp.LinkUp.domain.enums.ContactOperation;
 import org.springframework.http.ResponseEntity;
 
 import javax.swing.text.html.Option;
@@ -20,8 +21,6 @@ public interface UserService {
 
     void toggleUserStatus(String userId);
 
-    List<ContactDto> addContact(String userId, String contactId);
-
-    List<ContactDto> deleteContact(String userId, String contactId);
     List<ContactDto> idListToContactList(List<String> idList);
+    List<ContactDto> updateContact(String userId, String contactId, ContactOperation operation);
 }
