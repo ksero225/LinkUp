@@ -1,13 +1,11 @@
 import sys
 import json
-from base64 import b64encode
 
 import requests
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon
 from PySide6.QtGui import QIcon
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
+from PySide6.QtCore import Qt
 
 from ui_form import Ui_MainWindow
 from LoginWindow import LoginWindow
@@ -16,7 +14,7 @@ from AddContactWindow import AddContactWindow
 from RemoveContactWindow import RemoveContactWindow
 from WebSocketClient import WebSocketStompClient
 from config import api_link_websocket
-from User import User
+from AboutWindow import AboutWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -34,6 +32,9 @@ class MainWindow(QMainWindow):
 
         self.ui.actionAdd_new_contact.setEnabled(False)
         self.ui.actionDelete_contact.setEnabled(False)
+        self.ui.actionLog_out.setEnabled(False)
+        self.ui.actionAbout_me.setEnabled(False)
+        self.ui.actionSign_up.setEnabled(True)
 
         self.set_status_label()
 
@@ -48,6 +49,8 @@ class MainWindow(QMainWindow):
         self.ui.actionAdd_new_contact.triggered.connect(self.show_add_contact_window)
         self.ui.actionDelete_contact.triggered.connect(self.show_remove_contact_window)
         self.ui.listWidget.currentItemChanged.connect(self.on_contact_changed)
+        self.ui.actionAbout.triggered.connect(self.show_about_window)
+        self.ui.actionLog_out.triggered.connect(self.logout)
 
     def show_login_window(self):
         """Otwiera okno logowania i dodaje użytkownika do listy"""
@@ -62,6 +65,9 @@ class MainWindow(QMainWindow):
                 self.set_status_label()
                 self.ui.actionAdd_new_contact.setEnabled(True)
                 self.ui.actionDelete_contact.setEnabled(True)
+                self.ui.actionLog_out.setEnabled(True)
+                self.ui.actionAbout_me.setEnabled(True)
+                self.ui.actionSign_up.setEnabled(False)
                 self.websocket_client = WebSocketStompClient(api_link_websocket, self.user.get_user_login())
                 self.websocket_client.received_message.connect(self.receive_message)
                 self.websocket_client.start()
@@ -82,9 +88,14 @@ class MainWindow(QMainWindow):
 
     def show_remove_contact_window(self):
         """Otwiera okno usuwania kontaktu"""
-        remove_contact_window = RemoveContactWindow(self, user_id=self.user.get_user_id())
+        remove_contact_window = RemoveContactWindow(self, user=self.user)
         if remove_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
-            pass
+            removed_contact = remove_contact_window.removed_contact
+            if removed_contact:
+                items = self.ui.listWidget.findItems(removed_contact, Qt.MatchFlag.MatchExactly)
+                for item in items:
+                    row = self.ui.listWidget.row(item)
+                    self.ui.listWidget.takeItem(row)
 
     def set_status_label(self):
         if self.user:
@@ -158,8 +169,22 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.ui.textEdit.append(f'<p style="color: red;">Decryption error: {str(e)}</p>')
 
-    def closeEvent(self, event):
+    def logout(self):
+        self.user = None
         self.websocket_client.stop_client()
+        self.set_status_label()
+        self.ui.actionAdd_new_contact.setEnabled(False)
+        self.ui.actionDelete_contact.setEnabled(False)
+        self.ui.actionSign_in.setEnabled(True)
+        self.ui.actionSign_up.setEnabled(True)
+        self.ui.lineEdit.setText("Log in before start typing")
+        self.ui.lineEdit.setReadOnly(True)
+        self.ui.listWidget.clear()
+        self.ui.textEdit.clear()
+
+    def closeEvent(self, event):
+        if self.user is not None:
+            self.logout()
         event.accept()
 
     def on_contact_changed(self, current, previous):
@@ -178,6 +203,7 @@ class MainWindow(QMainWindow):
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
+            print(data)
             messages = data.get('content', [])
 
             if not messages:
@@ -206,6 +232,10 @@ class MainWindow(QMainWindow):
 
         except requests.exceptions.RequestException as e:
             self.ui.textEdit.append(f'<p style="color: red;">Error fetching messages: {str(e)}</p>')
+
+    def show_about_window(self):
+        self.about_window = AboutWindow()
+        self.about_window.show()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import requests
-from config import get_new_contact_link
+from config import contact_link
 from ErrorHandler import show_error_message
 from User import User
 
@@ -14,15 +14,15 @@ class AddContactWindow(QDialog):
 
         layout = QVBoxLayout(self)
 
-        self.user_id = user.get_user_id()
+        self.user_login = user.get_user_login()
         self.user_contacts = user.get_user_contacts()
 
-        # Pole ID kontaktu
-        self.label_contact_id = QLabel("Contact ID:")
-        self.input_contact_id = QLineEdit()
-        self.input_contact_id.setMinimumHeight(20)
-        layout.addWidget(self.label_contact_id)
-        layout.addWidget(self.input_contact_id)
+        # Pole login kontaktu
+        self.label_contact_login = QLabel("Contact name:")
+        self.input_contact_login = QLineEdit()
+        self.input_contact_login.setMinimumHeight(20)
+        layout.addWidget(self.label_contact_login)
+        layout.addWidget(self.input_contact_login)
 
         # Przycisk dodawania kontaktu
         self.btn_add_contact = QPushButton("Add Contact")
@@ -31,16 +31,18 @@ class AddContactWindow(QDialog):
         layout.addWidget(self.btn_add_contact)
 
     def handle_add_contact(self):
-        contact_id = self.input_contact_id.text()
+        contact_login = self.input_contact_login.text()
 
-        if not contact_id:
-            show_error_message("Contact ID cannot be empty!")
+        if not contact_login:
+            show_error_message("Contact name cannot be empty!")
             return
 
-        api_link_add_contact = get_new_contact_link(self.user_id, contact_id)
+        api_link_add_contact = contact_link(self.user_login, contact_login, 'ADD')
+        print(api_link_add_contact)
 
         try:
             response = requests.patch(api_link_add_contact, timeout=5)
+            print(response.status_code)
 
             if response.status_code == 200:
                 new_contact_data = response.json()
