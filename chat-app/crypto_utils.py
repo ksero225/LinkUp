@@ -88,23 +88,23 @@ class CryptoUtils:
         encrypted_key_for_sender = CryptoUtils.encrypt_aes_key(aes_key, sender_public_key)
 
         return {
-            "encrypted_message": b64encode(encrypted_message).decode(),
+            "encryptedMessage": b64encode(encrypted_message).decode(),
             "iv": b64encode(iv).decode(),
-            "key_for_recipient": b64encode(encrypted_key_for_recipient).decode(),
-            "key_for_sender": b64encode(encrypted_key_for_sender).decode()
+            "keyForRecipient": b64encode(encrypted_key_for_recipient).decode(),
+            "keyForSender": b64encode(encrypted_key_for_sender).decode()
         }
 
     @staticmethod
     def decrypt_message(encrypted_data, private_key):
         """Odszyfrowuje wiadomość AES."""
-        encrypted_message = b64decode(encrypted_data["encrypted_message"])
+        encrypted_message = b64decode(encrypted_data["encryptedMessage"])
         iv = b64decode(encrypted_data["iv"])
 
         # Próbujemy odszyfrować klucz AES (dla nadawcy lub odbiorcy)
         try:
-            aes_key = CryptoUtils.decrypt_aes_key(b64decode(encrypted_data["key_for_recipient"]), private_key)
+            aes_key = CryptoUtils.decrypt_aes_key(b64decode(encrypted_data["keyForRecipient"]), private_key)
         except:
-            aes_key = CryptoUtils.decrypt_aes_key(b64decode(encrypted_data["key_for_sender"]), private_key)
+            aes_key = CryptoUtils.decrypt_aes_key(b64decode(encrypted_data["keyForSender"]), private_key)
 
         # Odszyfrowanie wiadomości AES
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(iv))

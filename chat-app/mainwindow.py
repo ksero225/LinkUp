@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
                 return
 
             encrypted_data = self.user.encrypt_message(message_text, recipient_public_key)
-            self.websocket_client.send_message(recipient, json.dumps(encrypted_data))
+            self.websocket_client.send_message(recipient, encrypted_data)
             self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
     def receive_message(self, message):
@@ -146,9 +146,20 @@ class MainWindow(QMainWindow):
             print(message_data)
 
             sender = message_data.get('sender')
-            encrypted_data = message_data.get('content')
+            encrypted_message = message_data.get('encryptedMessage')
+            iv = message_data.get('iv')
+            key_for_recipient = message_data.get('keyForRecipient')
+            key_for_sender = message_data.get('keyForSender')
 
-            decrypted_message = self.user.decrypt_message(json.loads(encrypted_data))
+            # Przygotowanie danych do deszyfrowania
+            encrypted_data = {
+                "encryptedMessage": encrypted_message,
+                "iv": iv,
+                "keyForRecipient": key_for_recipient,
+                "keyForSender": key_for_sender
+            }
+
+            decrypted_message = self.user.decrypt_message(encrypted_data)
 
             formatted_message = f'<p style="color: green;"><b>{sender}:</b> {decrypted_message}</p>'
 
@@ -212,8 +223,7 @@ class MainWindow(QMainWindow):
 
             for msg in reversed(messages):
                 try:
-                    content_str = msg.get("content", "{}")
-                    encrypted_data = json.loads(content_str)
+                    encrypted_data = msg
 
                     decrypted_text = self.user.decrypt_message(encrypted_data)
                     sender = msg.get("sender", "Unknown")

@@ -84,8 +84,11 @@ class WebSocketStompClient(QThread):
         if self.ws and self.connected:
             message_body = json.dumps({
                 "sender": self.username,
-                "content": message_text,
-                "recipient": recipient
+                "recipient": recipient,
+                "encryptedMessage": message_text["encryptedMessage"],
+                "iv": message_text["iv"],
+                "keyForRecipient": message_text["keyForRecipient"],
+                "keyForSender": message_text["keyForSender"]
             })
 
             # Wysyłamy do `/app/chat.private`, aby kontroler Spring obsłużył wiadomość
