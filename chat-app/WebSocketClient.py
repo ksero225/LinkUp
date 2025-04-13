@@ -20,36 +20,38 @@ class WebSocketStompClient(QThread):
     def __init__(self, uri, username):
         super().__init__()
         self.uri = uri
+        self.username = username
         self.ws = None
         self.connected = False
-        self.username = username
+        self.running = True
 
     def run(self):
-        self.ws = websocket.WebSocketApp(
-            self.uri,
-            on_open=self.on_open,
-            on_message=self.on_message,
-            on_error=self.on_error,
-            on_close=self.on_close
-        )
-
-        self.ws.run_forever()
+        while self.running:
+            try:
+                self.ws = websocket.WebSocketApp(
+                    self.uri,
+                    on_open=self.on_open,
+                    on_message=self.on_message,
+                    on_error=self.on_error,
+                    on_close=self.on_close
+                )
+                self.ws.run_forever()
+            except Exception as e:
+                print(f"WebSocket thread error: {e}")
+                time.sleep(5)  # Retry after delay
 
     def on_open(self, ws):
         print("WebSocket connection opened.")
         self.connected = True
 
-        # Wysyłamy STOMP CONNECT frame
         connect_frame = stomp_frame("CONNECT", headers={
             "accept-version": "1.1,1.2",
             "host": "linkup-rf0o.onrender.com"
         })
         ws.send(connect_frame)
         print("Sent CONNECT frame.")
+        time.sleep(1)
 
-        time.sleep(1)  # Poczekaj, aż serwer potwierdzi CONNECTED
-
-        # Subskrypcja publicznych wiadomości
         public_subscribe_frame = stomp_frame("SUBSCRIBE", headers={
             "id": "sub-0",
             "destination": "/topic/public"
@@ -57,7 +59,6 @@ class WebSocketStompClient(QThread):
         ws.send(public_subscribe_frame)
         print("Subscribed to public chat.")
 
-        # Subskrypcja prywatnych wiadomości użytkownika
         private_subscribe_frame = stomp_frame("SUBSCRIBE", headers={
             "id": "sub-1",
             "destination": f"/user/{self.username}/private"
@@ -67,11 +68,8 @@ class WebSocketStompClient(QThread):
 
     def on_message(self, ws, message):
         print("Received message:", message)
-
-        if message.startswith("CONNECTED"):
-            return
-
-        self.received_message.emit(message)
+        if not message.startswith("CONNECTED"):
+            self.received_message.emit(message)
 
     def on_error(self, ws, error):
         print("WebSocket error:", error)
@@ -82,25 +80,36 @@ class WebSocketStompClient(QThread):
 
     def send_message(self, recipient, message_text):
         if self.ws and self.connected:
-            message_body = json.dumps({
-                "sender": self.username,
-                "recipient": recipient,
-                "encryptedMessage": message_text["encryptedMessage"],
-                "iv": message_text["iv"],
-                "keyForRecipient": message_text["keyForRecipient"],
-                "keyForSender": message_text["keyForSender"]
-            })
+            try:
+                message_body = json.dumps({
+                    "sender": self.username,
+                    "recipient": recipient,
+                    "encryptedMessage": message_text["encryptedMessage"],
+                    "iv": message_text["iv"],
+                    "keyForRecipient": message_text["keyForRecipient"],
+                    "keyForSender": message_text["keyForSender"]
+                })
 
-            # Wysyłamy do `/app/chat.private`, aby kontroler Spring obsłużył wiadomość
-            send_frame = stomp_frame("SEND", headers={
-                "destination": "/app/chat.private",
-                "content-length": str(len(message_body))
-            }, body=message_body)
-            self.ws.send(send_frame)
-            print(f"Sent private message to {recipient}: {message_text}")
+                send_frame = stomp_frame("SEND", headers={
+                    "destination": "/app/chat.private",
+                    "content-length": str(len(message_body))
+                }, body=message_body)
+
+                self.ws.send(send_frame)
+                print(f"Sent private message to {recipient}: {message_text}")
+            except Exception as e:
+                print(f"Error sending message: {e}")
         else:
-            print("Not connected.")
+            print("Cannot send message: not connected.")
 
     def stop_client(self):
+        self.running = False
+        if self.ws and self.connected:
+            try:
+                disconnect_frame = stomp_frame("DISCONNECT")
+                self.ws.send(disconnect_frame)
+                print("Sent DISCONNECT frame.")
+            except Exception as e:
+                print(f"Error during disconnect: {e}")
         if self.ws:
             self.ws.close()

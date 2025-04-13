@@ -8,10 +8,10 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 
 from ui_form import Ui_MainWindow
-from LoginWindow import LoginWindow
-from RegisterWindow import RegisterWindow
-from AddContactWindow import AddContactWindow
-from RemoveContactWindow import RemoveContactWindow
+from dialogs.login_dialog import LoginWindow
+from dialogs.register_dialog import RegisterWindow
+from windows.contact.add_contact_window import AddContactWindow
+from windows.contact.remove_contact_window import RemoveContactWindow
 from WebSocketClient import WebSocketStompClient
 from config import api_link_websocket
 from AboutWindow import AboutWindow
@@ -30,20 +30,23 @@ class MainWindow(QMainWindow):
         self.selected_contact = None
         self.websocket_client = None
 
+        self.setup_ui()
+        self.connect_actions()
+
+    def setup_ui(self):
         self.ui.actionAdd_new_contact.setEnabled(False)
         self.ui.actionDelete_contact.setEnabled(False)
         self.ui.actionLog_out.setEnabled(False)
         self.ui.actionAbout_me.setEnabled(False)
         self.ui.actionSign_up.setEnabled(True)
 
-        self.set_status_label()
-
         self.ui.lineEdit.setText("Log in before start typing")
         self.ui.lineEdit.setReadOnly(True)
 
-        self.ui.lineEdit.returnPressed.connect(self.send_message)
+        self.set_status_label()
 
-        # Połączenie akcji w menu z oknem logowania
+    def connect_actions(self):
+        self.ui.lineEdit.returnPressed.connect(self.send_message)
         self.ui.actionSign_in.triggered.connect(self.show_login_window)
         self.ui.actionSign_up.triggered.connect(self.show_register_window)
         self.ui.actionAdd_new_contact.triggered.connect(self.show_add_contact_window)
@@ -53,49 +56,48 @@ class MainWindow(QMainWindow):
         self.ui.actionLog_out.triggered.connect(self.logout)
 
     def show_login_window(self):
-        """Otwiera okno logowania i dodaje użytkownika do listy"""
         login_window = LoginWindow(self)
-        if login_window.exec():  # Jeśli użytkownik się zalogował (dialog zwróci 1)
+        if login_window.exec():
             self.user = login_window.user
             if self.user:
-                self.add_contacts_to_widget()  # Dodaj do listy
-                self.ui.actionSign_in.setEnabled(False)
-                self.ui.lineEdit.setText("")
-                self.ui.lineEdit.setReadOnly(False)
-                self.set_status_label()
-                self.ui.actionAdd_new_contact.setEnabled(True)
-                self.ui.actionDelete_contact.setEnabled(True)
-                self.ui.actionLog_out.setEnabled(True)
-                self.ui.actionAbout_me.setEnabled(True)
-                self.ui.actionSign_up.setEnabled(False)
-                self.websocket_client = WebSocketStompClient(api_link_websocket, self.user.get_user_login())
-                self.websocket_client.received_message.connect(self.receive_message)
-                self.websocket_client.start()
+                self.prepare_logged_in_state()
+
+    def prepare_logged_in_state(self):
+        self.ui.listWidget.clear()
+        self.add_contacts_to_widget()
+        self.set_status_label()
+        self.ui.lineEdit.setText("")
+        self.ui.lineEdit.setReadOnly(False)
+
+        self.ui.actionSign_in.setEnabled(False)
+        self.ui.actionSign_up.setEnabled(False)
+        self.ui.actionAdd_new_contact.setEnabled(True)
+        self.ui.actionDelete_contact.setEnabled(True)
+        self.ui.actionLog_out.setEnabled(True)
+        self.ui.actionAbout_me.setEnabled(True)
+
+        self.websocket_client = WebSocketStompClient(api_link_websocket, self.user.get_user_login())
+        self.websocket_client.received_message.connect(self.receive_message)
+        self.websocket_client.start()
 
     def show_register_window(self):
-        """Otwiera okno rejestracji"""
-        register_window = RegisterWindow(self)
-        if register_window.exec():  # Jeśli użytkownik się zarejestrował (dialog zwróci 1)
-            pass
+        RegisterWindow(self).exec()
 
     def show_add_contact_window(self):
-        """Otwiera okno dodawania kontaktu"""
-        new_contact_window = AddContactWindow(self, user=self.user)
-        if new_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
-            new_contact = new_contact_window.new_contact
+        add_window = AddContactWindow(self, user=self.user)
+        if add_window.exec():
+            new_contact = add_window.result_contact
             if new_contact:
                 self.ui.listWidget.addItem(new_contact['contactLogin'])
 
     def show_remove_contact_window(self):
-        """Otwiera okno usuwania kontaktu"""
-        remove_contact_window = RemoveContactWindow(self, user=self.user)
-        if remove_contact_window.exec():  # Jeśli użytkownik dodał poprawnie kontakt (dialog zwróci 1)
-            removed_contact = remove_contact_window.removed_contact
+        remove_window = RemoveContactWindow(self, user=self.user)
+        if remove_window.exec():
+            removed_contact = remove_window.result_contact
             if removed_contact:
                 items = self.ui.listWidget.findItems(removed_contact, Qt.MatchFlag.MatchExactly)
                 for item in items:
-                    row = self.ui.listWidget.row(item)
-                    self.ui.listWidget.takeItem(row)
+                    self.ui.listWidget.takeItem(self.ui.listWidget.row(item))
 
     def set_status_label(self):
         if self.user:
@@ -108,7 +110,6 @@ class MainWindow(QMainWindow):
             self.ui.listWidget.addItem(contact['contactLogin'])
 
     def send_message(self):
-        """Szyfruje wiadomość kluczem publicznym odbiorcy i wysyła ją."""
         if not self.user:
             return
 
@@ -121,37 +122,33 @@ class MainWindow(QMainWindow):
         message_text = self.ui.lineEdit.text().strip()
         self.ui.lineEdit.clear()
 
-        if message_text:
-            recipient_public_key = self.user.get_contact_public_key(recipient)
-            if not recipient_public_key:
-                self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
-                return
+        if not message_text:
+            return
 
-            encrypted_data = self.user.encrypt_message(message_text, recipient_public_key)
-            self.websocket_client.send_message(recipient, encrypted_data)
-            self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
+        recipient_key = self.user.get_contact_public_key(recipient)
+        if not recipient_key:
+            self.ui.textEdit.append('<p style="color: red;">Recipient public key missing!</p>')
+            return
+
+        encrypted = self.user.encrypt_message(message_text, recipient_key)
+        print(encrypted)
+        self.websocket_client.send_message(recipient, encrypted)
+
+        self.ui.textEdit.append(f'<p style="color: blue;"><b>Me:</b> {message_text}</p>')
 
     def receive_message(self, message):
-        """Odszyfrowuje wiadomość kluczem prywatnym użytkownika po jej odebraniu."""
         try:
-            # Usuwamy znak null i ewentualne białe znaki
             message = message.rstrip('\x00').strip()
-
-            # Jeśli wiadomość zawiera nagłówki STOMP, wydziel tylko część z JSON
             parts = message.split('\n\n', 1)
             json_part = parts[1].strip() if len(parts) > 1 else message
 
             message_data = json.loads(json_part)
-
-            print(message_data)
-
             sender = message_data.get('sender')
             encrypted_message = message_data.get('encryptedMessage')
             iv = message_data.get('iv')
             key_for_recipient = message_data.get('keyForRecipient')
             key_for_sender = message_data.get('keyForSender')
 
-            # Przygotowanie danych do deszyfrowania
             encrypted_data = {
                 "encryptedMessage": encrypted_message,
                 "iv": iv,
@@ -159,63 +156,71 @@ class MainWindow(QMainWindow):
                 "keyForSender": key_for_sender
             }
 
-            decrypted_message = self.user.decrypt_message(encrypted_data)
-
-            formatted_message = f'<p style="color: green;"><b>{sender}:</b> {decrypted_message}</p>'
+            decrypted = self.user.decrypt_message(encrypted_data)
+            display = f'<p style="color: green;"><b>{sender}:</b> {decrypted}</p>'
 
             if self.selected_contact == sender:
-                self.ui.textEdit.append(formatted_message)
+                self.ui.textEdit.append(display)
 
             if self.tray_icon.isVisible():
                 self.tray_icon.showMessage(
                     f"New message from {sender}",
-                    decrypted_message,
+                    decrypted,
                     QSystemTrayIcon.Information,
                     5000
                 )
 
         except json.JSONDecodeError:
             self.ui.textEdit.append('<p style="color: red;">Invalid message received!</p>')
-
         except Exception as e:
             self.ui.textEdit.append(f'<p style="color: red;">Decryption error: {str(e)}</p>')
 
     def logout(self):
+        try:
+            if self.websocket_client:
+                self.websocket_client.stop_client()
+        except Exception as e:
+            print(f"Error on logout: {e}")
+
         self.user = None
-        self.websocket_client.stop_client()
-        self.set_status_label()
-        self.ui.actionAdd_new_contact.setEnabled(False)
-        self.ui.actionDelete_contact.setEnabled(False)
-        self.ui.actionSign_in.setEnabled(True)
-        self.ui.actionSign_up.setEnabled(True)
+        self.websocket_client = None
+        self.selected_contact = None
+
         self.ui.lineEdit.setText("Log in before start typing")
         self.ui.lineEdit.setReadOnly(True)
         self.ui.listWidget.clear()
         self.ui.textEdit.clear()
 
+        self.ui.actionAdd_new_contact.setEnabled(False)
+        self.ui.actionDelete_contact.setEnabled(False)
+        self.ui.actionSign_in.setEnabled(True)
+        self.ui.actionSign_up.setEnabled(True)
+        self.ui.actionLog_out.setEnabled(False)
+        self.ui.actionAbout_me.setEnabled(False)
+
+        self.set_status_label()
+
     def closeEvent(self, event):
-        if self.user is not None:
-            self.logout()
+        self.logout()
         event.accept()
 
-    def on_contact_changed(self, current, previous):
-        """Czyści textEdit i ładuje wiadomości od wybranego kontaktu z API."""
+    def on_contact_changed(self, current, _):
         self.ui.textEdit.clear()
 
         if not current or not self.user:
             return
 
-        selected_contact = current.text()
-        self.selected_contact = selected_contact
-        sender_login = self.user.get_user_login()
-        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender_login}&recipient={selected_contact}&page=0&size=20"
+        self.selected_contact = current.text()
+        self.load_conversation(self.user.get_user_login(), self.selected_contact)
+
+    def load_conversation(self, sender, recipient):
+        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={recipient}&page=0&size=20"
 
         try:
             response = requests.get(url)
             response.raise_for_status()
-            data = response.json()
-            print(data)
-            messages = data.get('content', [])
+            print(response.json())
+            messages = response.json().get("content", [])
 
             if not messages:
                 self.ui.textEdit.append('<p style="color: gray;">No messages found.</p>')
@@ -223,24 +228,17 @@ class MainWindow(QMainWindow):
 
             for msg in reversed(messages):
                 try:
-                    encrypted_data = msg
+                    decrypted = self.user.decrypt_message(msg)
+                    is_me = msg.get("sender") == sender
 
-                    decrypted_text = self.user.decrypt_message(encrypted_data)
-                    sender = msg.get("sender", "Unknown")
+                    self.ui.textEdit.append(
+                        f'<p style="color: {"blue" if is_me else "green"};"><b>{"Me" if is_me else msg.get("sender")}:</b> {decrypted}</p>'
+                    )
 
-                    if sender == sender_login:
-                        color = "blue"
-                        sender = "Me"
-                    else:
-                        color = "green"
+                except Exception:
+                    self.ui.textEdit.append('<p style="color: red;">[Error decrypting message]</p>')
 
-                    self.ui.textEdit.append(f'<p style="color: {color};"><b>{sender}:</b> {decrypted_text}</p>')
-
-                except Exception as e:
-                    sender = msg.get("sender", "Unknown")
-                    self.ui.textEdit.append(f'<p style="color: red;">[Error decrypting message from {sender}]</p>')
-
-        except requests.exceptions.RequestException as e:
+        except requests.RequestException as e:
             self.ui.textEdit.append(f'<p style="color: red;">Error fetching messages: {str(e)}</p>')
 
     def show_about_window(self):
