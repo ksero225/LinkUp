@@ -2,9 +2,10 @@ import sys
 import json
 
 import requests
+from PySide6 import QtCore
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QTextCursor
 from PySide6.QtCore import Qt
 
 from ui_form import Ui_MainWindow
@@ -30,6 +31,10 @@ class MainWindow(QMainWindow):
         self.selected_contact = None
         self.websocket_client = None
 
+        self.current_page = 0
+        self.loading = False
+        self.last_loaded_contact = None
+
         self.setup_ui()
         self.connect_actions()
 
@@ -54,6 +59,7 @@ class MainWindow(QMainWindow):
         self.ui.listWidget.currentItemChanged.connect(self.on_contact_changed)
         self.ui.actionAbout.triggered.connect(self.show_about_window)
         self.ui.actionLog_out.triggered.connect(self.logout)
+        self.ui.textEdit.verticalScrollBar().valueChanged.connect(self.handle_scroll)
 
     def show_login_window(self):
         login_window = LoginWindow(self)
@@ -206,45 +212,90 @@ class MainWindow(QMainWindow):
 
     def on_contact_changed(self, current, _):
         self.ui.textEdit.clear()
+        self.current_page = 0
+        self.last_loaded_contact = None
 
         if not current or not self.user:
             return
 
         self.selected_contact = current.text()
-        self.load_conversation(self.user.get_user_login(), self.selected_contact)
+        self.load_conversation(self.user.get_user_login(), self.selected_contact, 0)
 
-    def load_conversation(self, sender, recipient):
-        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={recipient}&page=0&size=20"
+    def load_conversation(self, sender, recipient, page=0):
+        # Zabezpieczenie przed ładowaniem nieaktualnego czatu
+        current_requested_contact = recipient
+
+        if self.last_loaded_contact != recipient and page > 0:
+            return
+
+        self.loading = True
+        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={recipient}&page={page}&size=20"
+
+        scrollbar = self.ui.textEdit.verticalScrollBar()
+        old_value = scrollbar.value()
+        old_max = scrollbar.maximum()
 
         try:
             response = requests.get(url)
             response.raise_for_status()
-            print(response.json())
             messages = response.json().get("content", [])
 
             if not messages:
-                self.ui.textEdit.append('<p style="color: gray;">No messages found.</p>')
+                if page == 0:
+                    self.ui.textEdit.append('<p style="color: gray;">No messages found.</p>')
+                self.loading = False
                 return
 
-            for msg in reversed(messages):
-                try:
-                    decrypted = self.user.decrypt_message(msg)
-                    is_me = msg.get("sender") == sender
+            if page > 0:
+                cursor = self.ui.textEdit.textCursor()
+                cursor.movePosition(QTextCursor.Start)
 
-                    self.ui.textEdit.append(
-                        f'<p style="color: {"blue" if is_me else "green"};"><b>{"Me" if is_me else msg.get("sender")}:</b> {decrypted}</p>'
-                    )
+                for msg in reversed(messages):
+                    # Zabezpieczenie przed zmianą kontaktu
+                    if self.selected_contact != current_requested_contact:
+                        return
 
-                except Exception:
-                    self.ui.textEdit.append('<p style="color: red;">[Error decrypting message]</p>')
+                    try:
+                        decrypted = self.user.decrypt_message(msg)
+                        is_me = msg.get("sender") == sender
+                        html = f'<p style="color: {"blue" if is_me else "green"};"><b>{"Me" if is_me else msg.get("sender")}:</b> {decrypted}</p>'
+                        cursor.insertHtml(html)
+                        cursor.insertBlock()
+                    except Exception:
+                        cursor.insertHtml('<p style="color: red;">[Error decrypting message]</p>')
+                        cursor.insertBlock()
+
+                QtCore.QTimer.singleShot(0, lambda: scrollbar.setValue(scrollbar.maximum() - (old_max - old_value)))
+
+            else:
+                self.ui.textEdit.clear()  # <- to też tutaj dla pewności
+                for msg in reversed(messages):
+                    if self.selected_contact != current_requested_contact:
+                        return
+
+                    try:
+                        decrypted = self.user.decrypt_message(msg)
+                        is_me = msg.get("sender") == sender
+                        self.ui.textEdit.append(
+                            f'<p style="color: {"blue" if is_me else "green"};"><b>{"Me" if is_me else msg.get("sender")}:</b> {decrypted}</p>'
+                        )
+                    except Exception:
+                        self.ui.textEdit.append('<p style="color: red;">[Error decrypting message]</p>')
 
         except requests.RequestException as e:
             self.ui.textEdit.append(f'<p style="color: red;">Error fetching messages: {str(e)}</p>')
+
+        self.loading = False
+        self.last_loaded_contact = recipient
 
     def show_about_window(self):
         self.about_window = AboutWindow()
         self.about_window.show()
 
+    def handle_scroll(self, value):
+        if value == 0 and not self.loading and self.selected_contact:
+            self.current_page += 1
+            self.load_conversation(self.user.get_user_login(), self.selected_contact, self.current_page)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
