@@ -4,6 +4,7 @@ from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding as sym_padding
 
 class CryptoUtils:
     """Klasa odpowiedzialna za szyfrowanie i odszyfrowywanie wiadomości."""
@@ -80,8 +81,9 @@ class CryptoUtils:
         # Szyfrowanie wiadomości AES
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(iv))
         encryptor = cipher.encryptor()
-        padded_message = message + ' ' * (16 - len(message) % 16)  # Padding do 16 bajtów
-        encrypted_message = encryptor.update(padded_message.encode()) + encryptor.finalize()
+        padder = sym_padding.PKCS7(128).padder()
+        padded_data = padder.update(message.encode()) + padder.finalize()
+        encrypted_message = encryptor.update(padded_data) + encryptor.finalize()
 
         # Szyfrujemy klucz AES dwoma kluczami publicznymi
         encrypted_key_for_recipient = CryptoUtils.encrypt_aes_key(aes_key, recipient_public_key)
@@ -109,6 +111,10 @@ class CryptoUtils:
         # Odszyfrowanie wiadomości AES
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(iv))
         decryptor = cipher.decryptor()
-        decrypted_padded_message = decryptor.update(encrypted_message) + decryptor.finalize()
+        decrypted_data = decryptor.update(encrypted_message) + decryptor.finalize()
 
-        return decrypted_padded_message.rstrip().decode()
+        unpadder = sym_padding.PKCS7(128).unpadder()
+        unpadded_data = unpadder.update(decrypted_data) + unpadder.finalize()
+
+        return unpadded_data.decode()
+
