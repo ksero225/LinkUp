@@ -14,7 +14,7 @@ from dialogs.register_dialog import RegisterWindow
 from windows.contact.add_contact_window import AddContactWindow
 from windows.contact.remove_contact_window import RemoveContactWindow
 from WebSocketClient import WebSocketStompClient
-from config import api_link_websocket
+from config import api_link_websocket, resource_path
 from AboutWindow import AboutWindow
 
 class MainWindow(QMainWindow):
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon("assets/icon.jpg"))
+        self.tray_icon.setIcon(QIcon(resource_path('assets/icon_eXh_icon.ico')))
         self.tray_icon.setVisible(True)
 
         self.user = None
@@ -301,7 +301,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("LinkUp Messenger")
     app.setApplicationDisplayName("LinkUp")
-    app.setWindowIcon(QIcon("assets/icon.jpg"))
+    app.setWindowIcon(QIcon(resource_path('assets/icon_eXh_icon.ico')))
 
     widget = MainWindow()
     widget.show()

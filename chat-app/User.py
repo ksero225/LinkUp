@@ -1,6 +1,7 @@
 from crypto_utils import CryptoUtils
 import os
 from base64 import b64decode
+from pathlib import Path
 
 class User:
     def __init__(self, userId, userLogin, userEmail, userFriendList, userPassword):
@@ -13,7 +14,10 @@ class User:
         self._private_key = None
         self._public_key = None
 
-        if os.path.exists(f"{self._userLogin}_private_key.pem"):
+        self._key_path = Path.home() / ".LinkUp" / f"{self._userLogin}_private_key.pem"
+        self._key_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if self._key_path.exists():
             self.load_private_key()
         else:
             self.generate_keys()
@@ -23,11 +27,11 @@ class User:
         self._private_key, self._public_key = CryptoUtils.generate_rsa_keypair()
 
     def save_private_key(self):
-        with open(f"{self._userLogin}_private_key.pem", "wb") as f:
+        with open(self._key_path, "wb") as f:
             f.write(CryptoUtils.serialize_private_key(self._private_key, self._userPassword))
 
     def load_private_key(self):
-        with open(f"{self._userLogin}_private_key.pem", "rb") as f:
+        with open(self._key_path, "rb") as f:
             self._private_key = CryptoUtils.load_private_key_from_pem(f.read(), self._userPassword)
         self._public_key = self._private_key.public_key()
 
