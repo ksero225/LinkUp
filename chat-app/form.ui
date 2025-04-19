@@ -72,7 +72,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuKonto">
@@ -82,7 +82,7 @@
     <addaction name="actionSign_in"/>
     <addaction name="actionSign_up"/>
     <addaction name="actionLog_out"/>
-    <addaction name="actionAbout_me"/>
+    <addaction name="actionMy_profile"/>
    </widget>
    <widget class="QMenu" name="menuManage_contacts">
     <property name="title">
@@ -118,12 +118,15 @@
     <string>Log out</string>
    </property>
   </action>
-  <action name="actionAbout_me">
+  <action name="actionMy_profile">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::AddressBookNew"/>
+    <iconset theme="QIcon::ThemeIcon::UserAvailable"/>
    </property>
    <property name="text">
-    <string>About me</string>
+    <string>My Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>My Profile</string>
    </property>
   </action>
   <action name="actionAdd_new_contact">

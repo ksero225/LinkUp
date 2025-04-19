@@ -14,8 +14,9 @@ from dialogs.register_dialog import RegisterWindow
 from windows.contact.add_contact_window import AddContactWindow
 from windows.contact.remove_contact_window import RemoveContactWindow
 from WebSocketClient import WebSocketStompClient
-from config import api_link_websocket, resource_path
+from config import api_link_websocket, resource_path, chat_history_link
 from AboutWindow import AboutWindow
+from ProfileWindow import ProfileWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -42,7 +43,7 @@ class MainWindow(QMainWindow):
         self.ui.actionAdd_new_contact.setEnabled(False)
         self.ui.actionDelete_contact.setEnabled(False)
         self.ui.actionLog_out.setEnabled(False)
-        self.ui.actionAbout_me.setEnabled(False)
+        self.ui.actionMy_profile.setEnabled(False)
         self.ui.actionSign_up.setEnabled(True)
 
         self.ui.lineEdit.setText("Log in before start typing")
@@ -60,6 +61,7 @@ class MainWindow(QMainWindow):
         self.ui.actionAbout.triggered.connect(self.show_about_window)
         self.ui.actionLog_out.triggered.connect(self.logout)
         self.ui.textEdit.verticalScrollBar().valueChanged.connect(self.handle_scroll)
+        self.ui.actionMy_profile.triggered.connect(self.show_profile_window)
 
     def show_login_window(self):
         login_window = LoginWindow(self)
@@ -80,7 +82,7 @@ class MainWindow(QMainWindow):
         self.ui.actionAdd_new_contact.setEnabled(True)
         self.ui.actionDelete_contact.setEnabled(True)
         self.ui.actionLog_out.setEnabled(True)
-        self.ui.actionAbout_me.setEnabled(True)
+        self.ui.actionMy_profile.setEnabled(True)
 
         self.websocket_client = WebSocketStompClient(api_link_websocket, self.user.get_user_login())
         self.websocket_client.received_message.connect(self.receive_message)
@@ -88,6 +90,10 @@ class MainWindow(QMainWindow):
 
     def show_register_window(self):
         RegisterWindow(self).exec()
+
+    def show_profile_window(self):
+        self.profile_window = ProfileWindow(self.user)
+        self.profile_window.show()
 
     def show_add_contact_window(self):
         add_window = AddContactWindow(self, user=self.user)
@@ -173,7 +179,7 @@ class MainWindow(QMainWindow):
                     f"New message from {sender}",
                     decrypted,
                     QSystemTrayIcon.Information,
-                    5000
+                    3000
                 )
 
         except json.JSONDecodeError:
@@ -202,7 +208,7 @@ class MainWindow(QMainWindow):
         self.ui.actionSign_in.setEnabled(True)
         self.ui.actionSign_up.setEnabled(True)
         self.ui.actionLog_out.setEnabled(False)
-        self.ui.actionAbout_me.setEnabled(False)
+        self.ui.actionMy_profile.setEnabled(False)
 
         self.set_status_label()
 
@@ -229,7 +235,7 @@ class MainWindow(QMainWindow):
             return
 
         self.loading = True
-        url = f"https://linkup-rf0o.onrender.com/api/messages?sender={sender}&recipient={recipient}&page={page}&size=20"
+        url = chat_history_link(sender, recipient, page)
 
         scrollbar = self.ui.textEdit.verticalScrollBar()
         old_value = scrollbar.value()
@@ -268,7 +274,7 @@ class MainWindow(QMainWindow):
                 QtCore.QTimer.singleShot(0, lambda: scrollbar.setValue(scrollbar.maximum() - (old_max - old_value)))
 
             else:
-                self.ui.textEdit.clear()  # <- to też tutaj dla pewności
+                self.ui.textEdit.clear()
                 for msg in reversed(messages):
                     if self.selected_contact != current_requested_contact:
                         return
