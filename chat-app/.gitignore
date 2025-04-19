@@ -35,6 +35,7 @@ Thumbs.db
 /.qmake.cache
 /.qmake.stash
 *.pem
+*.spec
 
 # qtcreator generated files
 *.pro.user*
@@ -82,6 +83,7 @@ CMakeLists.txt.user*
 .uic/
 /build*/
 .idea/
+dist/
 
 # Configuration files
 config.py
