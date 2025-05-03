@@ -3,7 +3,11 @@
 
 LinkUp is a chat application designed to connect people seamlessly. With a simple interface, it allows users to register, log in, add friends, and chat with them in real time.
 
+## Application view
 
+<p align="center">
+  <img src="https://i.imgur.com/Sr1D6zR.png" alt="1">
+</p>
 
 ## Roadmap (in no particular order)
 
@@ -33,7 +37,6 @@ LinkUp is a chat application designed to connect people seamlessly. With a simpl
 
 - **Python3**
 - **PySide6**
-  ...
 
 ## Features
 - User Authentication – Secure registration and login system
