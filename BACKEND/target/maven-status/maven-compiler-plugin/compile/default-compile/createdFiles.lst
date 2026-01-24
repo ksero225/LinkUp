@@ -3,6 +3,7 @@ com\LinkUp\LinkUp\services\UserService.class
 com\LinkUp\LinkUp\controllers\UserController.class
 com\LinkUp\LinkUp\repositories\MessageRepository.class
 com\LinkUp\LinkUp\domain\documents\User.class
+com\LinkUp\LinkUp\domain\enums\ContactOperation.class
 com\LinkUp\LinkUp\domain\UserLoginRequest$UserLoginRequestBuilder.class
 com\LinkUp\LinkUp\controllers\MessageHistoryController.class
 com\LinkUp\LinkUp\domain\UserRegisterRequest.class
